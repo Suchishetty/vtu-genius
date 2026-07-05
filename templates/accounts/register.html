@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}Register | VTU Genius{% endblock %}
+
+{% block body_class %}register-page{% endblock %}
+
+{% block content %}
+<section class="auth-shell py-5">
+    <div class="container py-lg-5">
+        <div class="row justify-content-center align-items-center g-4">
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="auth-intro text-white">
+                    <span class="auth-kicker">Student onboarding</span>
+                    <h1 class="display-5 fw-bold mt-3 mb-3">Create your VTU Genius account</h1>
+                    <p class="auth-copy mb-4">
+                        Join a focused exam-preparation platform designed for VTU students with guided study support, organized planning, and a clean academic workflow.
+                    </p>
+                    <div class="auth-benefits">
+                        <div class="benefit-item">
+                            <span class="benefit-icon">01</span>
+                            <div>
+                                <h2>Academic profile setup</h2>
+                                <p>Choose your branch and semester so the platform can tailor your experience.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon">02</span>
+                            <div>
+                                <h2>Secure authentication</h2>
+                                <p>Your account uses Django’s built-in password hashing and session management.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon">03</span>
+                            <div>
+                                <h2>Ready for your dashboard</h2>
+                                <p>Once registered, you can sign in and continue from your personalized student area.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-10 col-lg-7 col-xl-6">
+                <div class="glass-card">
+                    <div class="card-header-copy text-center text-lg-start">
+                        <span class="form-badge">Registration</span>
+                        <h2 class="fw-bold mt-3 mb-2">Build your student profile</h2>
+                        <p class="text-muted mb-0">Fill in your details to create a secure VTU Genius account.</p>
+                    </div>
+
+                    {% if messages %}
+                        <div class="mt-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger mt-4 mb-0" role="alert">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation mt-4" novalidate id="registerForm">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="{{ form.full_name.id_for_label }}" class="form-label fw-semibold">Full Name</label>
+                                <div class="input-shell {% if form.full_name.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.full_name }}
+                                </div>
+                                {% if form.full_name.help_text %}
+                                    <div class="form-text">{{ form.full_name.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.full_name.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email Address</label>
+                                <div class="input-shell {% if form.email.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                            <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.email }}
+                                </div>
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.branch.id_for_label }}" class="form-label fw-semibold">Branch</label>
+                                <div class="input-shell {% if form.branch.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 3 4 7l8 4 8-4-8-4Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                            <path d="M4 12l8 4 8-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M4 17l8 4 8-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.branch }}
+                                </div>
+                                {% for error in form.branch.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.semester.id_for_label }}" class="form-label fw-semibold">Semester</label>
+                                <div class="input-shell {% if form.semester.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                                            <path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.semester }}
+                                </div>
+                                {% for error in form.semester.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Password</label>
+                                <div class="input-shell password-shell {% if form.password.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                                            <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.password }}
+                                    <button type="button" class="toggle-password" data-target="{{ form.password.id_for_label }}" aria-label="Show password">
+                                        <span class="toggle-show">Show</span>
+                                        <span class="toggle-hide d-none">Hide</span>
+                                    </button>
+                                </div>
+                                {% if form.password.help_text %}
+                                    <div class="form-text">{{ form.password.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.password.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="{{ form.confirm_password.id_for_label }}" class="form-label fw-semibold">Confirm Password</label>
+                                <div class="input-shell password-shell {% if form.confirm_password.errors %}has-errors{% endif %}">
+                                    <span class="input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 12.75 11.25 15 15.75 9.75" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <rect x="4" y="4" width="16" height="16" rx="8" stroke="currentColor" stroke-width="1.7"/>
+                                        </svg>
+                                    </span>
+                                    {{ form.confirm_password }}
+                                    <button type="button" class="toggle-password" data-target="{{ form.confirm_password.id_for_label }}" aria-label="Show confirm password">
+                                        <span class="toggle-show">Show</span>
+                                        <span class="toggle-hide d-none">Hide</span>
+                                    </button>
+                                </div>
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg register-btn" id="registerSubmit">
+                                <span class="btn-label">Register</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-muted small mt-4 mb-0">
+                            Already have an account?
+                            <a href="{% url 'accounts:login' %}" class="auth-link">Login</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .register-page .navbar {
+        background: rgba(9, 18, 38, 0.88) !important;
+    }
+
+    .auth-shell {
+        min-height: calc(100vh - 76px);
+        background:
+            radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.22), transparent 22%),
+            radial-gradient(circle at 80% 30%, rgba(15, 76, 129, 0.18), transparent 24%),
+            linear-gradient(135deg, #eaf4ff 0%, #f8fbff 48%, #ffffff 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-shell::before,
+    .auth-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(18px);
+        z-index: 0;
+    }
+
+    .auth-shell::before {
+        width: 280px;
+        height: 280px;
+        background: rgba(56, 189, 248, 0.18);
+        top: 4rem;
+        left: -4rem;
+    }
+
+    .auth-shell::after {
+        width: 240px;
+        height: 240px;
+        background: rgba(15, 76, 129, 0.12);
+        bottom: 2rem;
+        right: -3rem;
+    }
+
+    .auth-intro,
+    .glass-card {
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-intro {
+        padding: 2rem 1rem 2rem 0;
+        color: var(--brand-navy);
+    }
+
+    .auth-kicker,
+    .form-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .auth-kicker {
+        background: rgba(255, 255, 255, 0.16);
+        color: var(--brand-blue);
+        border: 1px solid rgba(15, 76, 129, 0.16);
+    }
+
+    .auth-copy {
+        color: #334155;
+        max-width: 34rem;
+        line-height: 1.75;
+    }
+
+    .auth-benefits {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .benefit-item {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+        padding: 1rem 1.1rem;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(8px);
+    }
+
+    .benefit-item h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .benefit-item p {
+        margin: 0;
+        color: #475569;
+        line-height: 1.65;
+    }
+
+    .benefit-icon {
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+        box-shadow: 0 12px 24px rgba(15, 76, 129, 0.18);
+        flex-shrink: 0;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        border-radius: 1.9rem;
+        padding: 2rem;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.14);
+    }
+
+    .form-badge {
+        background: rgba(15, 76, 129, 0.08);
+        color: var(--brand-blue);
+    }
+
+    .input-shell {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        width: 1.15rem;
+        height: 1.15rem;
+        color: #64748b;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .input-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .input-shell .form-control,
+    .input-shell .form-select {
+        min-height: 3.35rem;
+        padding-left: 3rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: none;
+    }
+
+    .input-shell .form-control:focus,
+    .input-shell .form-select:focus {
+        border-color: rgba(15, 76, 129, 0.45);
+        box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.16);
+        background: #ffffff;
+    }
+
+    .input-shell.has-errors .form-control,
+    .input-shell.has-errors .form-select,
+    .was-validated .input-shell .form-control:invalid,
+    .was-validated .input-shell .form-select:invalid {
+        border-color: #dc3545;
+        padding-right: 1rem;
+        background-image: none;
+    }
+
+    .password-shell .form-control {
+        padding-right: 5rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 0.9rem;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: var(--brand-blue);
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.25rem 0.4rem;
+        z-index: 2;
+    }
+
+    .toggle-password:hover,
+    .toggle-password:focus {
+        color: var(--brand-navy);
+    }
+
+    .register-btn {
+        min-height: 3.5rem;
+        border: 0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+        box-shadow: 0 18px 36px rgba(15, 76, 129, 0.2);
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .register-btn:hover,
+    .register-btn:focus {
+        background: linear-gradient(135deg, #0d426f, #22b7ef);
+    }
+
+    .register-btn:disabled {
+        opacity: 0.9;
+    }
+
+    .auth-link {
+        color: var(--brand-blue);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .auth-link:hover,
+    .auth-link:focus {
+        text-decoration: underline;
+    }
+
+    .form-text {
+        color: #64748b;
+        margin-top: 0.45rem;
+    }
+
+    .field-errors {
+        font-size: 0.88rem;
+        margin-top: 0.45rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .glass-card {
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .auth-shell {
+            padding-top: 1.25rem;
+        }
+
+        .glass-card {
+            padding: 1.25rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("registerForm");
+        const submitButton = document.getElementById("registerSubmit");
+
+        document.querySelectorAll(".toggle-password").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(button.dataset.target);
+                const showText = button.querySelector(".toggle-show");
+                const hideText = button.querySelector(".toggle-hide");
+                const isPassword = input.getAttribute("type") === "password";
+
+                input.setAttribute("type", isPassword ? "text" : "password");
+                showText.classList.toggle("d-none", isPassword);
+                hideText.classList.toggle("d-none", !isPassword);
+                button.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+            });
+        });
+
+        if (form) {
+            Array.from(form.elements).forEach(function (element) {
+                if (element.classList.contains("form-control") || element.classList.contains("form-select")) {
+                    if (element.closest(".has-errors")) {
+                        element.classList.add("is-invalid");
+                    }
+                }
+            });
+
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.querySelector(".btn-label").textContent = "Creating account...";
+                    submitButton.querySelector(".spinner-border").classList.remove("d-none");
+                }
+
+                form.classList.add("was-validated");
+            });
+        }
+    });
+</script>
+{% endblock %}

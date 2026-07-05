@@ -123,6 +123,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'staticfiles',
 ]
+STATIC_ROOT = BASE_DIR / 'static_root'
+
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'dashboard:dashboard_home'
+LOGOUT_REDIRECT_URL = 'accounts:home'
 
 # Media files (user-uploaded content such as PDF notes)
 # URL path for serving media files during development

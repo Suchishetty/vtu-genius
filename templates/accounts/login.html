@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}Login | VTU Genius{% endblock %}
+
+{% block body_class %}login-page{% endblock %}
+
+{% block content %}
+<section class="login-shell d-flex align-items-center justify-content-center py-4 py-lg-5">
+    <div class="container">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="glass-login-card mx-auto">
+                    <div class="text-center mb-4">
+                        <span class="login-badge">Student Access</span>
+                        <h1 class="fw-bold mt-3 mb-2">Welcome back to VTU Genius</h1>
+                        <p class="text-muted mb-0">
+                            Sign in to continue your exam preparation with your personalized student workspace.
+                        </p>
+                    </div>
+
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger mb-4" role="alert">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate id="loginForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email Address</label>
+                            <div class="input-shell {% if form.email.errors %}has-errors{% endif %}">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                        <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                {{ form.email }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center justify-content-between gap-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold mb-0">Password</label>
+                                <a href="#" class="forgot-link small">Forgot Password?</a>
+                            </div>
+                            <div class="input-shell password-shell mt-2 {% if form.password.errors %}has-errors{% endif %}">
+                                <span class="input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/>
+                                        <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                {{ form.password }}
+                                <button type="button" class="toggle-password" data-target="{{ form.password.id_for_label }}" aria-label="Show password">
+                                    <span class="toggle-show">Show</span>
+                                    <span class="toggle-hide d-none">Hide</span>
+                                </button>
+                            </div>
+                            {% for error in form.password.errors %}
+                                <div class="invalid-feedback d-block field-errors">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                            <div class="form-check remember-check">
+                                {{ form.remember_me }}
+                                <label class="form-check-label" for="{{ form.remember_me.id_for_label }}">
+                                    Remember Me
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg login-btn" id="loginSubmit">
+                                <span class="btn-label">Login</span>
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+
+                        <p class="text-center text-muted small mt-4 mb-0">
+                            Don't have an account?
+                            <a href="{% url 'accounts:register' %}" class="auth-link">Register</a>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .login-page .navbar {
+        background: rgba(9, 18, 38, 0.88) !important;
+    }
+
+    .login-shell {
+        min-height: calc(100vh - 76px);
+        background:
+            radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.22), transparent 20%),
+            radial-gradient(circle at 82% 28%, rgba(15, 76, 129, 0.16), transparent 24%),
+            linear-gradient(145deg, #eaf4ff 0%, #f6fbff 48%, #ffffff 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-shell::before,
+    .login-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(18px);
+        z-index: 0;
+    }
+
+    .login-shell::before {
+        width: 260px;
+        height: 260px;
+        background: rgba(56, 189, 248, 0.18);
+        top: 3rem;
+        left: -4rem;
+    }
+
+    .login-shell::after {
+        width: 230px;
+        height: 230px;
+        background: rgba(15, 76, 129, 0.12);
+        bottom: 2rem;
+        right: -3rem;
+    }
+
+    .glass-login-card {
+        position: relative;
+        z-index: 1;
+        max-width: 38rem;
+        background: rgba(255, 255, 255, 0.66);
+        border: 1px solid rgba(255, 255, 255, 0.58);
+        border-radius: 2rem;
+        padding: 2rem;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 30px 80px rgba(15, 23, 42, 0.14);
+    }
+
+    .login-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: rgba(15, 76, 129, 0.08);
+        color: var(--brand-blue);
+    }
+
+    .input-shell {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        width: 1.15rem;
+        height: 1.15rem;
+        color: #64748b;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .input-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .input-shell .form-control {
+        min-height: 3.35rem;
+        padding-left: 3rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: none;
+    }
+
+    .input-shell .form-control:focus {
+        border-color: rgba(15, 76, 129, 0.45);
+        box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.16);
+        background: #ffffff;
+    }
+
+    .input-shell.has-errors .form-control,
+    .was-validated .input-shell .form-control:invalid {
+        border-color: #dc3545;
+        padding-right: 1rem;
+        background-image: none;
+    }
+
+    .password-shell .form-control {
+        padding-right: 5rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 0.9rem;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: var(--brand-blue);
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 0.25rem 0.4rem;
+        z-index: 2;
+    }
+
+    .toggle-password:hover,
+    .toggle-password:focus {
+        color: var(--brand-navy);
+    }
+
+    .remember-check {
+        margin-bottom: 0;
+    }
+
+    .remember-check .form-check-input {
+        border-color: rgba(15, 76, 129, 0.32);
+        box-shadow: none;
+    }
+
+    .remember-check .form-check-input:checked {
+        background-color: var(--brand-blue);
+        border-color: var(--brand-blue);
+    }
+
+    .remember-check .form-check-label {
+        color: #334155;
+        font-weight: 500;
+    }
+
+    .forgot-link,
+    .auth-link {
+        color: var(--brand-blue);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .forgot-link:hover,
+    .forgot-link:focus,
+    .auth-link:hover,
+    .auth-link:focus {
+        text-decoration: underline;
+    }
+
+    .login-btn {
+        min-height: 3.5rem;
+        border: 0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, var(--brand-blue), var(--brand-cyan));
+        box-shadow: 0 18px 36px rgba(15, 76, 129, 0.2);
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .login-btn:hover,
+    .login-btn:focus {
+        background: linear-gradient(135deg, #0d426f, #22b7ef);
+    }
+
+    .login-btn:disabled {
+        opacity: 0.9;
+    }
+
+    .field-errors {
+        font-size: 0.88rem;
+        margin-top: 0.45rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .glass-login-card {
+            padding: 1.65rem;
+            border-radius: 1.6rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .login-shell {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .glass-login-card {
+            padding: 1.25rem;
+            border-radius: 1.35rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("loginForm");
+        const submitButton = document.getElementById("loginSubmit");
+
+        document.querySelectorAll(".toggle-password").forEach(function (button) {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(button.dataset.target);
+                const showText = button.querySelector(".toggle-show");
+                const hideText = button.querySelector(".toggle-hide");
+                const isPassword = input.getAttribute("type") === "password";
+
+                input.setAttribute("type", isPassword ? "text" : "password");
+                showText.classList.toggle("d-none", isPassword);
+                hideText.classList.toggle("d-none", !isPassword);
+                button.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+            });
+        });
+
+        if (form) {
+            Array.from(form.elements).forEach(function (element) {
+                if (element.classList.contains("form-control") || element.classList.contains("form-select")) {
+                    if (element.closest(".has-errors")) {
+                        element.classList.add("is-invalid");
+                    }
+                }
+            });
+
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                } else if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.querySelector(".btn-label").textContent = "Signing in...";
+                    submitButton.querySelector(".spinner-border").classList.remove("d-none");
+                }
+
+                form.classList.add("was-validated");
+            });
+        }
+    });
+</script>
+{% endblock %}
