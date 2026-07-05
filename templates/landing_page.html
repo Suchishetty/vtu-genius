@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}VTU Genius | AI-Powered Exam Preparation Platform{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block content %}
+<section class="hero-section py-5 py-lg-6">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="eyebrow-badge mb-3">Built for VTU students</span>
+                <h1 class="display-4 fw-bold text-white mb-3">VTU Genius</h1>
+                <p class="lead text-white-50 mb-4">
+                    AI-Powered Exam Preparation Platform for VTU Students
+                </p>
+                <p class="hero-copy text-white-50 mb-4">
+                    Prepare smarter with curated study resources, focused revision support, and analytics that help you improve topic by topic before exams.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-light btn-lg px-4">Login</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg px-4">Register</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-panel">
+                    <div class="panel-card">
+                        <p class="panel-label">Why students choose VTU Genius</p>
+                        <div class="panel-metric">
+                            <span class="metric-number">3x</span>
+                            <span class="metric-copy">Faster revision with structured AI-assisted preparation flows</span>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-sm-6">
+                                <div class="mini-feature">
+                                    <h3>Smart Notes</h3>
+                                    <p>Condensed concepts designed for quick recall before exams.</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mini-feature">
+                                    <h3>Performance Tracking</h3>
+                                    <p>See weak areas early and focus your study time where it matters.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features-section py-5">
+    <div class="container">
+        <div class="text-center section-heading mx-auto mb-5">
+            <span class="section-kicker">Features</span>
+            <h2 class="fw-bold mb-3">Everything needed for confident exam preparation</h2>
+            <p class="text-muted mb-0">
+                A modern study platform that combines AI guidance, organized material, and exam-focused workflows.
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">AI</div>
+                    <h3>AI Study Guidance</h3>
+                    <p>Receive focused suggestions for revision plans, difficult topics, and exam strategy.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">PYQ</div>
+                    <h3>Previous Exam Insights</h3>
+                    <p>Review common question patterns and prepare with more clarity and confidence.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">NT</div>
+                    <h3>Organized Notes</h3>
+                    <p>Access concise and structured content that supports both learning and rapid revision.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">AN</div>
+                    <h3>Progress Analytics</h3>
+                    <p>Track preparation trends and identify subjects that need extra attention.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">RV</div>
+                    <h3>Rapid Revision</h3>
+                    <p>Use streamlined study workflows to maximize the final days before exams.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="feature-card h-100">
+                    <div class="feature-icon">24</div>
+                    <h3>Anytime Access</h3>
+                    <p>Study seamlessly across devices with a responsive experience built on Bootstrap.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
