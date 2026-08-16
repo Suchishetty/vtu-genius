@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}Home - VTU Genius | AI-Powered Exam Preparation{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+        color: #fff;
+        padding: 6rem 1rem;
+        text-align: center;
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hero-content {
+        max-width: 800px;
+        animation: fadeInUp 0.8s ease;
+    }
+    
+    .hero-content h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+    }
+    
+    .hero-content .subtitle {
+        font-size: clamp(1.1rem, 3vw, 1.5rem);
+        font-weight: 300;
+        margin-bottom: 1.5rem;
+        opacity: 0.95;
+    }
+    
+    .hero-content p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+    
+    .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-hero {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary-hero {
+        background-color: #fff;
+        color: #0d6efd;
+    }
+    
+    .btn-primary-hero:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-secondary-hero {
+        background-color: transparent;
+        color: #fff;
+        border: 2px solid #fff;
+    }
+    
+    .btn-secondary-hero:hover {
+        background-color: #fff;
+        color: #0d6efd;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Features Section */
+    .features-section {
+        padding: 5rem 1rem;
+        background-color: #f8f9fa;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 3rem;
+    }
+    
+    .feature-card {
+        background: #fff;
+        border: none;
+        border-radius: 15px;
+        padding: 2rem;
+        height: 100%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(13, 110, 253, 0.2);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        color: #0d6efd;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    .feature-card h5 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    /* Why Choose Section */
+    .why-choose-section {
+        padding: 5rem 1rem;
+        background-color: #fff;
+    }
+    
+    .why-card {
+        background: linear-gradient(135deg, #e7f1ff 0%, #f0f7ff 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 2.5rem 2rem;
+        height: 100%;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .why-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+    }
+    
+    .why-icon {
+        font-size: 2.5rem;
+        color: #0058cc;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+    
+    .why-card h5 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #0058cc;
+        margin-bottom: 1rem;
+    }
+    
+    .why-card p {
+        font-size: 0.95rem;
+        color: #555;
+        line-height: 1.6;
+    }
+    
+    /* Footer CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+        color: #fff;
+        padding: 4rem 1rem;
+        text-align: center;
+        margin-top: 3rem;
+    }
+    
+    .cta-section h2 {
+        font-size: clamp(1.5rem, 4vw, 2.2rem);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-cta {
+        background-color: #fff;
+        color: #0d6efd;
+        padding: 0.8rem 2.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cta:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease 0.1s both;
+    }
+    
+    .fade-in-left {
+        animation: fadeInLeft 0.6s ease 0.2s both;
+    }
+    
+    .fade-in-right {
+        animation: fadeInRight 0.6s ease 0.2s both;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 4rem 1rem;
+            min-height: 500px;
+        }
+        
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn-hero {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .features-section,
+        .why-choose-section {
+            padding: 3rem 1rem;
+        }
+        
+        .section-title {
+            margin-bottom: 2rem;
+        }
+        
+        .feature-card,
+        .why-card {
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-section {
+            padding: 3rem 1rem;
+        }
+    }
+    
+    /* Grid Spacing */
+    .feature-row {
+        row-gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .why-row {
+        row-gap: 2rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>VTU Genius</h1>
+            <p class="subtitle">AI-Powered Exam Preparation Platform for VTU Students</p>
+            <p>Prepare smarter with AI-generated important questions, organized study notes, previous year papers, and personalized learning tools designed for VTU students.</p>
+            
+            <div class="hero-buttons">
+                <a href="#" class="btn btn-hero btn-primary-hero">
+                </a>
+                <a href="#" class="btn btn-hero btn-secondary-hero">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-stars"></i> Features That Help You Excel
+            </h2>
+            
+            <div class="row feature-row">
+                <!-- Feature 1: AI Exam Preparation -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-robot feature-icon"></i>
+                        <h5>AI Exam Preparation</h5>
+                        <p>Generate practice questions instantly with AI technology. Get unlimited questions tailored to your curriculum and difficulty level.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 2: Smart Notes Management -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-journal-text feature-icon"></i>
+                        <h5>Smart Notes Management</h5>
+                        <p>Organize your study notes efficiently. Create, edit, and manage notes with powerful search and categorization features.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 3: Previous Year Papers -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-file-earmark-pdf feature-icon"></i>
+                        <h5>Previous Year Papers</h5>
+                        <p>Access a comprehensive collection of previous year question papers. Solve actual exam papers to boost your preparation.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 4: Important Questions -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-question-circle feature-icon"></i>
+                        <h5>Important Questions</h5>
+                        <p>Find frequently asked questions compiled by experts. Get direct insights into what's likely to appear in your exams.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 5: Study Planner -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-calendar-check feature-icon"></i>
+                        <h5>Study Planner</h5>
+                        <p>Plan your study schedule intelligently. Get personalized study recommendations based on your exam date and progress.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 6: Student Dashboard -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card fade-in-up">
+                        <i class="bi bi-speedometer2 feature-icon"></i>
+                        <h5>Student Dashboard</h5>
+                        <p>Track your progress with intuitive analytics. Monitor your scores, weak topics, and get actionable improvement suggestions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Why Choose VTU Genius Section -->
+    <section class="why-choose-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="bi bi-check-circle-fill"></i> Why Choose VTU Genius?
+            </h2>
+            
+            <div class="row why-row">
+                <!-- Why Card 1: AI Powered -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="why-card fade-in-left">
+                        <i class="bi bi-lightning-fill why-icon"></i>
+                        <h5>AI Powered</h5>
+                        <p>Leveraging cutting-edge AI technology to generate personalized study materials and provide intelligent learning insights for maximum effectiveness.</p>
+                    </div>
+                </div>
+                
+                <!-- Why Card 2: Easy to Use -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="why-card fade-in-up">
+                        <i class="bi bi-hand-thumbs-up why-icon"></i>
+                        <h5>Easy to Use</h5>
+                        <p>Intuitive interface designed for students. No complicated setup required. Start preparing in seconds with our user-friendly platform.</p>
+                    </div>
+                </div>
+                
+                <!-- Why Card 3: Built for VTU -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="why-card fade-in-right">
+                        <i class="bi bi-bookmark-fill why-icon"></i>
+                        <h5>Built for VTU</h5>
+                        <p>Specifically designed for VTU students. Our curriculum aligns perfectly with VTU exam patterns, syllabus, and marking schemes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>
+                <i class="bi bi-book-half"></i> Start Your Smart Learning Journey Today
+            </h2>
+            <a href="#" class="btn btn-cta">
+                <i class="bi bi-person-plus"></i> Register Now
+            </a>
+        </div>
+    </section>
+{% endblock %}

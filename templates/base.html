@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VTU Genius - Your Learning Companion">
+    
+    <title>{% block title %}VTU Genius{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --light-blue: #e7f1ff;
+            --dark-blue: #004085;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Navbar Styling */
+        .navbar {
+            background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .navbar-brand i {
+            font-size: 1.8rem;
+        }
+        
+        .navbar .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .navbar .nav-link:hover {
+            color: #e7f1ff !important;
+        }
+        
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: width 0.3s ease;
+        }
+        
+        .navbar .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .btn-outline-light {
+            border-color: #fff;
+            color: #fff;
+        }
+        
+        .btn-outline-light:hover {
+            background-color: #fff;
+            color: #0d6efd;
+            border-color: #fff;
+        }
+        
+        .btn-danger-custom {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+        
+        .btn-danger-custom:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+        
+        /* Messages Styling */
+        .messages-container {
+            margin-top: 1rem;
+            padding: 0 1rem;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            width: 100%;
+        }
+        
+        .container-main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        /* Footer Styling */
+        footer {
+            background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+            color: #fff;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: auto;
+            border-top: 1px solid #e7f1ff;
+        }
+        
+        footer .footer-brand {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        footer .footer-text {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-bottom: 0.3rem;
+        }
+        
+        footer .footer-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.2);
+            margin: 1rem 0;
+        }
+        
+        footer .footer-credit {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .navbar .nav-link {
+                margin: 0.3rem 0;
+            }
+            
+            .container-main {
+                margin: 1rem auto;
+            }
+            
+            footer {
+                padding: 1.5rem 1rem;
+            }
+        }
+        
+        /* Accessibility */
+        .nav-link:focus {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+        
+        .btn:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <!-- Logo & Home -->
+            <a class="navbar-brand" href="{% url 'accounts:home' %}">
+                <i class="bi bi-mortarboard-fill"></i>
+                VTU Genius
+            </a>
+            
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Home Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:home' %}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    
+                    <!-- Guest User Links -->
+                    {% if not user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-person-plus"></i> Register
+                            </a>
+                        </li>
+                    {% else %}
+                        <!-- Authenticated User Links -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-person-circle"></i> Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-danger-custom" href="#">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Messages Framework -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle-fill"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="container-main">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-brand">
+            <i class="bi bi-mortarboard-fill"></i> VTU Genius
+        </div>
+        <div class="footer-text">
+            &copy; {% now "Y" %} VTU Genius. All rights reserved.
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-credit">
+            <i class="bi bi-heart-fill" style="color: #ff6b6b;"></i> 
+            Made with <strong>Django</strong> & <strong>Bootstrap 5</strong>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
