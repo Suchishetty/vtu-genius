@@ -260,31 +260,35 @@
                     <!-- Guest User Links -->
                     {% if not user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
                                 <i class="bi bi-box-arrow-in-right"></i> Login
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">
                                 <i class="bi bi-person-plus"></i> Register
                             </a>
                         </li>
                     {% else %}
                         <!-- Authenticated User Links -->
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'dashboard:dashboard' %}">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{% url 'dashboard:profile' %}">
                                 <i class="bi bi-person-circle"></i> Profile
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn-danger-custom" href="#">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </a>
+                            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-box-arrow-right me-1"></i>
+                                    Logout
+                                </button>
+                            </form>
                         </li>
                     {% endif %}
                 </ul>

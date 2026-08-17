@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-page {
+        padding: 0.5rem 0 2rem;
+    }
+
+    .profile-hero {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 58%, #dbeafe 100%);
+        color: #fff;
+        border-radius: 1.25rem;
+        padding: 2rem;
+        box-shadow: 0 18px 42px rgba(13, 110, 253, 0.18);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-hero::after {
+        content: "";
+        position: absolute;
+        top: -35px;
+        right: -30px;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .profile-hero h1 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-hero p {
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .profile-card {
+        border: 0;
+        border-radius: 1rem;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .profile-summary {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        text-align: center;
+        height: 100%;
+    }
+
+    .profile-avatar {
+        width: 88px;
+        height: 88px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: #e7f1ff;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .profile-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .profile-detail:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .detail-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 0.9rem;
+        background: #e7f1ff;
+        color: #0d6efd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.15rem;
+    }
+
+    .detail-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .detail-value {
+        color: #212529;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .btn-dashboard {
+        border-radius: 0.8rem;
+        font-weight: 600;
+        padding: 0.8rem 1.2rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .profile-page {
+            padding-top: 0;
+        }
+
+        .profile-hero {
+            padding: 1.5rem;
+            border-radius: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-hero mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="badge bg-light text-primary rounded-pill px-3 py-2 mb-3">
+                    <i class="bi bi-person-badge-fill me-1"></i> Student Profile
+                </span>
+                <h1>{{ profile.full_name }}</h1>
+                <p>View your academic profile details and account information in one place.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="bg-white bg-opacity-10 rounded-4 p-3 d-inline-block">
+                    <i class="bi bi-person-lines-fill fs-1"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-4">
+            <div class="card profile-card profile-summary">
+                <div class="card-body p-4 p-xl-5">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h2 class="h4 fw-bold text-dark mb-2">{{ profile.full_name }}</h2>
+                    <p class="text-muted mb-3">{{ profile.email }}</p>
+                    <div class="d-inline-flex align-items-center gap-2 badge bg-primary-subtle text-primary px-3 py-2 rounded-pill">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span>{{ profile.branch }} | Semester {{ profile.semester }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card profile-card">
+                <div class="card-body p-4">
+                    <h2 class="section-title">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>Profile Details
+                    </h2>
+
+                    <div class="profile-detail">
+                        <span class="detail-icon"><i class="bi bi-person-vcard-fill"></i></span>
+                        <div>
+                            <span class="detail-label">Full Name</span>
+                            <div class="detail-value">{{ profile.full_name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail">
+                        <span class="detail-icon"><i class="bi bi-envelope-fill"></i></span>
+                        <div>
+                            <span class="detail-label">Email</span>
+                            <div class="detail-value">{{ profile.email }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail">
+                        <span class="detail-icon"><i class="bi bi-diagram-3-fill"></i></span>
+                        <div>
+                            <span class="detail-label">Branch</span>
+                            <div class="detail-value">{{ profile.branch }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail">
+                        <span class="detail-icon"><i class="bi bi-calendar3"></i></span>
+                        <div>
+                            <span class="detail-label">Semester</span>
+                            <div class="detail-value">{{ profile.semester }}</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail">
+                        <span class="detail-icon"><i class="bi bi-clock-history"></i></span>
+                        <div>
+                            <span class="detail-label">Account Created Date</span>
+                            <div class="detail-value">{{ profile.created_at|date:"F d, Y" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex flex-column flex-sm-row gap-3">
+                        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-primary btn-dashboard">
+                            <i class="bi bi-arrow-left-circle-fill me-2"></i>Back to Dashboard
+                        </a>
+                        <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-primary btn-dashboard">
+                            <i class="bi bi-shield-lock me-2"></i>Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

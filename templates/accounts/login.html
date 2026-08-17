@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Login - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9f2ff 100%);
+        padding: 3rem 1rem;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 460px;
+        background: #fff;
+        border: 0;
+        border-radius: 1rem;
+        box-shadow: 0 14px 40px rgba(13, 110, 253, 0.12);
+        overflow: hidden;
+    }
+
+    .login-card-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+        color: #fff;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .login-card-header .icon-wrap {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .login-card-header h1 {
+        font-size: clamp(1.75rem, 4vw, 2.2rem);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-card-header p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .login-card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #0d6efd;
+    }
+
+    .form-control {
+        border: 1px solid #dee2e6;
+        padding: 0.8rem 1rem;
+    }
+
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    .invalid-feedback {
+        display: block;
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+        border: none;
+        padding: 0.85rem 1rem;
+        font-weight: 600;
+        border-radius: 0.75rem;
+        width: 100%;
+    }
+
+    .btn-login:hover {
+        background: linear-gradient(135deg, #0b5ed7 0%, #0047a8 100%);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #e9ecef;
+        color: #6c757d;
+    }
+
+    .register-link a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 576px) {
+        .login-container {
+            padding: 1.5rem 0.75rem;
+        }
+
+        .login-card-header,
+        .login-card-body {
+            padding: 1.5rem;
+        }
+
+        .form-control {
+            font-size: 16px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-card-header">
+            <div class="icon-wrap">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h1>Welcome Back</h1>
+            <p>Login to continue your VTU Genius learning journey</p>
+        </div>
+
+        <div class="login-card-body">
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <div>
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="bi bi-person-badge-fill me-1"></i> Email / Username
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-envelope-at-fill"></i>
+                        </span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        <i class="bi bi-lock-fill me-1"></i> Password
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-key-fill"></i>
+                        </span>
+                        {{ form.password }}
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                </button>
+
+                <div class="register-link">
+                    Don't have an account?
+                    <a href="{% url 'accounts:register' %}">Register</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

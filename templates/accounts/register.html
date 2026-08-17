@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block title %}Register - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Registration Page Styles */
+    .register-container {
+        min-height: calc(100vh - 120px); /* Adjust for navbar + footer */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 3rem 1rem;
+    }
+
+    .register-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        max-width: 600px;
+        width: 100%;
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .register-header h1 {
+        font-size: clamp(1.75rem, 5vw, 2.5rem);
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-header p {
+        font-size: 1rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control,
+    .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: white;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: #adb5bd;
+        font-style: italic;
+    }
+
+    /* Error Styling */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath fill='%23dc3545' d='M8 4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0 0 1h3A.5.5 0 0 0 8 4z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        padding-right: calc(1.5em + 0.75rem);
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+
+    /* Non-field Errors */
+    .alert-danger {
+        border: 2px solid #f5c6cb;
+        border-radius: 8px;
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+    }
+
+    .alert-danger ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert-danger li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Password Field Helper Text */
+    .password-requirements {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+        background-color: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .password-requirements ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .password-requirements li {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Submit Button */
+    .btn-register {
+        background: linear-gradient(135deg, #0d6efd 0%, #0058cc 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .btn-register:hover {
+        background: linear-gradient(135deg, #0056c4 0%, #003d99 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    }
+
+    .btn-register:disabled {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* Login Link */
+    .login-link-container {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .login-link-container p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .login-link-container a {
+        color: #0d6efd;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .login-link-container a:hover {
+        color: #0056c4;
+        text-decoration: underline;
+    }
+
+    /* Field Wrapper */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .form-row.two-cols {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .register-card {
+            padding: 3.5rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .register-container {
+            padding: 1.5rem 0.75rem;
+        }
+
+        .register-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .register-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <!-- Header Section -->
+        <div class="register-header">
+            <h1>
+                <i class="bi bi-person-plus-fill"></i> Create Account
+            </h1>
+            <p>Join VTU Genius and start your smart learning journey</p>
+        </div>
+
+        <!-- Non-Field Errors (e.g., custom form errors) -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>Registration Error:</strong>
+                <ul class="mb-0">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- Full Name Field -->
+            <div class="form-group">
+                <label for="id_full_name" class="form-label">
+                    <i class="bi bi-person"></i> Full Name
+                </label>
+                <input
+                    type="text"
+                    class="form-control {% if form.full_name.errors %}is-invalid{% endif %}"
+                    id="id_full_name"
+                    name="full_name"
+                    placeholder="Enter your full name"
+                    value="{{ form.full_name.value|default:'' }}"
+                    required
+                    autocomplete="name"
+                >
+                {% if form.full_name.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.full_name.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-group">
+                <label for="id_email" class="form-label">
+                    <i class="bi bi-envelope"></i> Email Address
+                </label>
+                <input
+                    type="email"
+                    class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                    id="id_email"
+                    name="email"
+                    placeholder="Enter your email"
+                    value="{{ form.email.value|default:'' }}"
+                    required
+                    autocomplete="email"
+                >
+                {% if form.email.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.email.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Branch and Semester Row -->
+            <div class="form-row two-cols">
+                <!-- Branch Field -->
+                <div class="form-group">
+                    <label for="id_branch" class="form-label">
+                        <i class="bi bi-diagram-3"></i> Branch
+                    </label>
+                    <select
+                        class="form-select {% if form.branch.errors %}is-invalid{% endif %}"
+                        id="id_branch"
+                        name="branch"
+                        required
+                    >
+                        <option value="">-- Select Branch --</option>
+                        {% for value, label in form.branch.field.choices %}
+                            {% if value != "" %}
+                                <option value="{{ value }}" {% if form.branch.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.branch.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.branch.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Semester Field -->
+                <div class="form-group">
+                    <label for="id_semester" class="form-label">
+                        <i class="bi bi-calendar3"></i> Semester
+                    </label>
+                    <select
+                        class="form-select {% if form.semester.errors %}is-invalid{% endif %}"
+                        id="id_semester"
+                        name="semester"
+                        required
+                    >
+                        <option value="">-- Select Semester --</option>
+                        {% for value, label in form.semester.field.choices %}
+                            {% if value != "" %}
+                                <option value="{{ value }}" {% if form.semester.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.semester.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.semester.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="id_password1" class="form-label">
+                    <i class="bi bi-lock"></i> Password
+                </label>
+                <input
+                    type="password"
+                    class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                    id="id_password1"
+                    name="password1"
+                    placeholder="Enter a strong password"
+                    required
+                    autocomplete="new-password"
+                >
+                {% if form.password1.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.password1.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="password-requirements">
+                        <strong>Password Requirements:</strong>
+                        <ul class="mb-0">
+                            <li>At least 8 characters long</li>
+                            <li>Not entirely numeric</li>
+                            <li>Not similar to your username or email</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div class="form-group">
+                <label for="id_password2" class="form-label">
+                    <i class="bi bi-lock-check"></i> Confirm Password
+                </label>
+                <input
+                    type="password"
+                    class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                    id="id_password2"
+                    name="password2"
+                    placeholder="Re-enter your password"
+                    required
+                    autocomplete="new-password"
+                >
+                {% if form.password2.errors %}
+                    <div class="invalid-feedback">
+                        {% for error in form.password2.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-register">
+                <i class="bi bi-check-circle"></i> Create Account
+            </button>
+
+            <!-- Login Link -->
+            <div class="login-link-container">
+                <p>
+                    Already have an account?
+                    <a href="#" title="Login page coming soon">Login here</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /**
+     * Form Validation Enhancement
+     * Provides real-time visual feedback for form inputs
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const inputs = form.querySelectorAll('.form-control, .form-select');
+
+        // Add visual feedback on input change
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                // Trigger validation on blur
+                if (this.value.trim() === '') {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+
+            input.addEventListener('input', function() {
+                // Remove error styling when user starts typing
+                if (this.classList.contains('is-invalid') && this.value.trim() !== '') {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+{% endblock %}

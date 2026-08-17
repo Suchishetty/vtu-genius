@@ -1,0 +1,450 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-page {
+        padding: 0.5rem 0 2rem;
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 55%, #dbeafe 100%);
+        color: #fff;
+        border-radius: 1.25rem;
+        padding: 2rem;
+        box-shadow: 0 18px 45px rgba(13, 110, 253, 0.18);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-banner::after {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -30px;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 50%;
+    }
+
+    .welcome-banner h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-banner p {
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.92);
+        max-width: 42rem;
+    }
+
+    .dashboard-card {
+        border: 0;
+        border-radius: 1rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        height: 100%;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 34px rgba(13, 110, 253, 0.12);
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .profile-list {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .profile-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .profile-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .profile-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 0.85rem;
+        background: #e7f1ff;
+        color: #0d6efd;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .profile-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.2rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .profile-value {
+        color: #212529;
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+    .stat-card .icon-wrap {
+        width: 52px;
+        height: 52px;
+        border-radius: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card .stat-label {
+        color: #6c757d;
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1;
+    }
+
+    .stat-blue {
+        background: #e7f1ff;
+        color: #0d6efd;
+    }
+
+    .stat-cyan {
+        background: #e0f7ff;
+        color: #0ea5e9;
+    }
+
+    .stat-indigo {
+        background: #e8edff;
+        color: #4f46e5;
+    }
+
+    .stat-sky {
+        background: #e6f4ff;
+        color: #0284c7;
+    }
+
+    .quick-action {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        height: 100%;
+    }
+
+    .quick-action .action-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #0d6efd 0%, #60a5fa 100%);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .quick-action h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+    }
+
+    .quick-action p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .activity-table thead th {
+        border-bottom: 0;
+        color: #495057;
+        font-weight: 700;
+        background: #f8fbff;
+        white-space: nowrap;
+    }
+
+    .activity-table tbody td {
+        vertical-align: middle;
+    }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .welcome-banner {
+            padding: 1.75rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .dashboard-page {
+            padding-top: 0;
+        }
+
+        .welcome-banner {
+            padding: 1.5rem;
+            border-radius: 1rem;
+        }
+
+        .dashboard-card {
+            border-radius: 0.9rem;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <div class="welcome-banner mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="badge bg-light text-primary rounded-pill px-3 py-2 mb-3">
+                    <i class="bi bi-mortarboard-fill me-1"></i> Student Dashboard
+                </span>
+                <h1>Welcome, {{ profile.full_name }}</h1>
+                <p>
+                    Track your academic profile, monitor your study journey, and access upcoming VTU Genius tools from one clean workspace.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="bg-white bg-opacity-10 rounded-4 p-3 d-inline-block">
+                    <i class="bi bi-person-workspace fs-1"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-4">
+            <div class="card dashboard-card">
+                <div class="card-body p-4">
+                    <h2 class="section-title">
+                        <i class="bi bi-person-vcard-fill text-primary me-2"></i>Student Information
+                    </h2>
+                    <div class="profile-list">
+                        <div class="profile-item">
+                            <span class="profile-icon"><i class="bi bi-person-fill"></i></span>
+                            <div>
+                                <span class="profile-label">Full Name</span>
+                                <div class="profile-value">{{ profile.full_name }}</div>
+                            </div>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-icon"><i class="bi bi-envelope-fill"></i></span>
+                            <div>
+                                <span class="profile-label">Email</span>
+                                <div class="profile-value">{{ profile.email }}</div>
+                            </div>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-icon"><i class="bi bi-diagram-3-fill"></i></span>
+                            <div>
+                                <span class="profile-label">Branch</span>
+                                <div class="profile-value">{{ profile.branch }}</div>
+                            </div>
+                        </div>
+                        <div class="profile-item">
+                            <span class="profile-icon"><i class="bi bi-calendar3"></i></span>
+                            <div>
+                                <span class="profile-label">Semester</span>
+                                <div class="profile-value">{{ profile.semester }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-8">
+            <div class="row g-4">
+                <div class="col-12 col-sm-6">
+                    <div class="card dashboard-card stat-card">
+                        <div class="card-body p-4">
+                            <div class="icon-wrap stat-blue">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div class="stat-label">Total Notes</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="card dashboard-card stat-card">
+                        <div class="card-body p-4">
+                            <div class="icon-wrap stat-cyan">
+                                <i class="bi bi-book-half"></i>
+                            </div>
+                            <div class="stat-label">Subjects</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="card dashboard-card stat-card">
+                        <div class="card-body p-4">
+                            <div class="icon-wrap stat-indigo">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <div class="stat-label">Study Progress</div>
+                            <div class="stat-value">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="card dashboard-card stat-card">
+                        <div class="card-body p-4">
+                            <div class="icon-wrap stat-sky">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <div class="stat-label">AI Queries</div>
+                            <div class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h2 class="section-title">
+            <i class="bi bi-lightning-charge-fill text-primary me-2"></i>Quick Actions
+        </h2>
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="#" class="quick-action">
+                    <div class="card dashboard-card">
+                        <div class="card-body p-4">
+                            <div class="action-icon">
+                                <i class="bi bi-cloud-arrow-up-fill"></i>
+                            </div>
+                            <h3>Upload Notes</h3>
+                            <p>Add your academic notes once this feature is available.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="#" class="quick-action">
+                    <div class="card dashboard-card">
+                        <div class="card-body p-4">
+                            <div class="action-icon">
+                                <i class="bi bi-collection-fill"></i>
+                            </div>
+                            <h3>My Notes</h3>
+                            <p>View and manage your saved study resources later.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="#" class="quick-action">
+                    <div class="card dashboard-card">
+                        <div class="card-body p-4">
+                            <div class="action-icon">
+                                <i class="bi bi-chat-dots-fill"></i>
+                            </div>
+                            <h3>AI Assistant</h3>
+                            <p>Ask learning questions with AI when the tool is launched.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <a href="#" class="quick-action">
+                    <div class="card dashboard-card">
+                        <div class="card-body p-4">
+                            <div class="action-icon">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <h3>My Profile</h3>
+                            <p>Review and update profile details in a future module.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card dashboard-card">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3 gap-2">
+                <h2 class="section-title mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>Recent Activity
+                </h2>
+                <span class="text-muted small">Placeholder data for upcoming activity tracking</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table activity-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Activity</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Account created successfully</td>
+                            <td>August 17, 2026</td>
+                            <td><span class="badge bg-success-subtle text-success status-badge">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>Dashboard profile initialized</td>
+                            <td>August 17, 2026</td>
+                            <td><span class="badge bg-primary-subtle text-primary status-badge">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td>Notes upload module coming soon</td>
+                            <td>August 18, 2026</td>
+                            <td><span class="badge bg-warning-subtle text-warning status-badge">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>AI assistant integration planned</td>
+                            <td>August 20, 2026</td>
+                            <td><span class="badge bg-info-subtle text-info status-badge">Upcoming</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

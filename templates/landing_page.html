@@ -312,9 +312,10 @@
             <p>Prepare smarter with AI-generated important questions, organized study notes, previous year papers, and personalized learning tools designed for VTU students.</p>
             
             <div class="hero-buttons">
-                <a href="#" class="btn btn-hero btn-primary-hero">
+                <a href="{% url 'accounts:register' %}" class="btn btn-hero btn-primary-hero">
+                    <i class="bi bi-person-plus-fill"></i> Get Started
                 </a>
-                <a href="#" class="btn btn-hero btn-secondary-hero">
+                <a href="{% url 'accounts:login' %}" class="btn btn-hero btn-secondary-hero">
                     <i class="bi bi-box-arrow-in-right"></i> Login
                 </a>
             </div>
@@ -430,7 +431,7 @@
             <h2>
                 <i class="bi bi-book-half"></i> Start Your Smart Learning Journey Today
             </h2>
-            <a href="#" class="btn btn-cta">
+            <a href="{% url 'accounts:register' %}" class="btn btn-cta">
                 <i class="bi bi-person-plus"></i> Register Now
             </a>
         </div>
