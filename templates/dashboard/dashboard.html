@@ -301,7 +301,7 @@
                                 <i class="bi bi-journal-text"></i>
                             </div>
                             <div class="stat-label">Total Notes</div>
-                            <div class="stat-value">0</div>
+                            <div class="stat-value">{{ statistics.total_notes }}</div>
                         </div>
                     </div>
                 </div>
@@ -311,8 +311,8 @@
                             <div class="icon-wrap stat-cyan">
                                 <i class="bi bi-book-half"></i>
                             </div>
-                            <div class="stat-label">Subjects</div>
-                            <div class="stat-value">0</div>
+                            <div class="stat-label">Total Subjects</div>
+                            <div class="stat-value">{{ statistics.total_subjects }}</div>
                         </div>
                     </div>
                 </div>
@@ -320,10 +320,10 @@
                     <div class="card dashboard-card stat-card">
                         <div class="card-body p-4">
                             <div class="icon-wrap stat-indigo">
-                                <i class="bi bi-graph-up-arrow"></i>
+                                <i class="bi bi-calendar3"></i>
                             </div>
-                            <div class="stat-label">Study Progress</div>
-                            <div class="stat-value">0%</div>
+                            <div class="stat-label">Current Semester</div>
+                            <div class="stat-value">{{ statistics.current_semester }}</div>
                         </div>
                     </div>
                 </div>
@@ -331,10 +331,16 @@
                     <div class="card dashboard-card stat-card">
                         <div class="card-body p-4">
                             <div class="icon-wrap stat-sky">
-                                <i class="bi bi-robot"></i>
+                                <i class="bi bi-clock-history"></i>
                             </div>
-                            <div class="stat-label">AI Queries</div>
-                            <div class="stat-value">0</div>
+                            <div class="stat-label">Latest Upload Date</div>
+                            <div class="stat-value">
+                                {% if statistics.latest_upload_date == "No uploads yet" %}
+                                    {{ statistics.latest_upload_date }}
+                                {% else %}
+                                    {{ statistics.latest_upload_date|date:"M d, Y" }}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -348,27 +354,27 @@
         </h2>
         <div class="row g-4">
             <div class="col-12 col-sm-6 col-xl-3">
-                <a href="#" class="quick-action">
+                <a href="{% url 'notes:upload' %}" class="quick-action">
                     <div class="card dashboard-card">
                         <div class="card-body p-4">
                             <div class="action-icon">
                                 <i class="bi bi-cloud-arrow-up-fill"></i>
                             </div>
                             <h3>Upload Notes</h3>
-                            <p>Add your academic notes once this feature is available.</p>
+                            <p>Add your academic notes to your student workspace.</p>
                         </div>
                     </div>
                 </a>
             </div>
             <div class="col-12 col-sm-6 col-xl-3">
-                <a href="#" class="quick-action">
+                <a href="{% url 'notes:my_notes' %}" class="quick-action">
                     <div class="card dashboard-card">
                         <div class="card-body p-4">
                             <div class="action-icon">
                                 <i class="bi bi-collection-fill"></i>
                             </div>
                             <h3>My Notes</h3>
-                            <p>View and manage your saved study resources later.</p>
+                            <p>View and manage the notes you have already uploaded.</p>
                         </div>
                     </div>
                 </a>
@@ -387,7 +393,7 @@
                 </a>
             </div>
             <div class="col-12 col-sm-6 col-xl-3">
-                <a href="#" class="quick-action">
+                <a href="{% url 'dashboard:profile' %}" class="quick-action">
                     <div class="card dashboard-card">
                         <div class="card-body p-4">
                             <div class="action-icon">
@@ -432,9 +438,9 @@
                             <td><span class="badge bg-primary-subtle text-primary status-badge">Active</span></td>
                         </tr>
                         <tr>
-                            <td>Notes upload module coming soon</td>
+                            <td>Notes upload module enabled</td>
                             <td>August 18, 2026</td>
-                            <td><span class="badge bg-warning-subtle text-warning status-badge">Pending</span></td>
+                            <td><span class="badge bg-success-subtle text-success status-badge">Available</span></td>
                         </tr>
                         <tr>
                             <td>AI assistant integration planned</td>
