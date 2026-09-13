@@ -28,6 +28,10 @@ from .exam_mode_service import ExamModePlanner
 
 logger = logging.getLogger(__name__)
 
+AI_UNAVAILABLE_MESSAGE = (
+    "The AI service is unavailable. Please try again later."
+)
+
 
 QUESTION_GENERATOR_INSTRUCTIONS = """
 You generate VTU exam-oriented questions using only the retrieved uploaded-note
@@ -213,10 +217,10 @@ class AskAIView(LoginRequiredMixin, View):
             )
 
         except Exception as exc:
-
-            print(
-                f"Notes context error: "
-                f"{type(exc).__name__}: {exc}"
+            logger.exception(
+                "Notes context failed for student_id=%s: %s",
+                student_profile.pk,
+                type(exc).__name__,
             )
 
             notes_context = ""
@@ -230,14 +234,11 @@ class AskAIView(LoginRequiredMixin, View):
             ai_service = AIService()
 
         except ImproperlyConfigured as exc:
-
-            print(
-                f"{type(exc).__name__}: {exc}"
-            )
+            logger.warning("AI service configuration is unavailable: %s", type(exc).__name__)
 
             messages.error(
                 request,
-                str(exc),
+                AI_UNAVAILABLE_MESSAGE,
             )
 
             return redirect(self.success_url)
@@ -255,14 +256,11 @@ class AskAIView(LoginRequiredMixin, View):
             )
 
         except Exception as exc:
-
-            print(
-                f"{type(exc).__name__}: {exc}"
-            )
+            logger.exception("AI assistant request failed: %s", type(exc).__name__)
 
             messages.error(
                 request,
-                str(exc),
+                AI_UNAVAILABLE_MESSAGE,
             )
 
             return redirect(self.success_url)
@@ -444,10 +442,10 @@ class AskAIView(LoginRequiredMixin, View):
                 )
 
             except Exception as exc:
-
-                print(
-                    f"PDF extraction error: "
-                    f"{type(exc).__name__}: {exc}"
+                logger.exception(
+                    "PDF extraction failed for note_id=%s: %s",
+                    note.pk,
+                    type(exc).__name__,
                 )
 
                 continue
@@ -558,7 +556,7 @@ class QuestionGeneratorView(LoginRequiredMixin, View):
                 student_profile.pk,
                 note.pk,
             )
-            context["generation_error"] = str(exc)
+            context["generation_error"] = AI_UNAVAILABLE_MESSAGE
             return render(request, self.template_name, context)
 
         questions = self._parse_questions(response, question_count)

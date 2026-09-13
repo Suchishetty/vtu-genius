@@ -1,36 +1,49 @@
 # VTU Genius
 
-VTU Genius is a Django study assistant for VTU students. It combines note management, exam preparation tools, PDF retrieval, and a local Ollama-powered assistant.
+VTU Genius is a Django study assistant for VTU students. It combines personal PDF notes, student-isolated retrieval-augmented generation, local Ollama responses, and exam-focused revision tools.
 
-## Main features
+## Features
 
-- Student registration, login, dashboard, and profile management
-- PDF note upload, download, deletion, and subject/unit organization
-- Persistent per-student RAG retrieval with ChromaDB
-- Ollama chat using the local `llama3.2` model
-- Expected-question generation, exam mode, and previous-year paper analysis
+- Student authentication and profiles
+- Personal notes and PDF upload, search, download, and deletion
+- RAG-based document retrieval limited to the current student's notes
+- AI Assistant with conversation history and note-grounded answers
+- VTU-style question generation
+- Expected exam questions
+- Previous-year question analysis
+- One-day-before exam mode and smart revision planner
 
-## Tech stack
+## Technology Stack
 
-- Python and Django
-- SQLite for local development, with environment-configurable database settings
-- ChromaDB and Sentence Transformers for local retrieval
-- Ollama for local AI responses
-- HTML templates, CSS, and Django static files
+**Frontend:** HTML, CSS, JavaScript, Django templates, Bootstrap-compatible static assets
 
-## Architecture overview
+**Backend:** Python, Django
 
-- `accounts/`: registration, authentication, and student profiles
-- `dashboard/`: dashboard and profile views
-- `notes/`: note models, uploads, and note operations
-- `ai_assistant/`: Ollama integration, PDF extraction, RAG indexing/retrieval, and exam features
-- `templates/`: Django templates
-- `static/`: source static assets
-- `vtu_genius/settings.py`: environment-driven application, database, static/media, ChromaDB, and Ollama configuration
+**AI:** Ollama, Llama 3.2
 
-Uploaded PDFs remain in `MEDIA_ROOT` locally. ChromaDB persists in `CHROMA_DB_PATH`; these directories are intentionally ignored by Git.
+**RAG:** ChromaDB, Sentence Transformers
 
-## Local setup
+**PDF:** pypdf
+
+**Deployment:** GitHub + Render, Gunicorn, WhiteNoise
+
+## Architecture
+
+```text
+User
+  -> Django authentication and views
+  -> PDF processing with pypdf
+  -> text chunking and embeddings
+  -> student-isolated ChromaDB storage
+  -> similarity retrieval for the current question
+  -> relevant context and conversation history
+  -> Ollama /api/chat
+  -> grounded AI response
+```
+
+The Django application owns authentication, authorization, note operations, feature workflows, and persistence. RAG retrieval filters ChromaDB metadata by student, and Ollama receives the retrieved context together with the existing VTU-specific instructions.
+
+## Local Setup
 
 Create and activate a virtual environment:
 
@@ -47,94 +60,137 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Create local configuration:
+Create local environment configuration:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Edit `.env` and set a private `SECRET_KEY`. The example uses SQLite, local media, local ChromaDB, and Ollama defaults. `.env` is ignored and must never be committed.
+Set a private `SECRET_KEY` in `.env`. Local defaults are:
 
-## Run Ollama locally
-
-Install Ollama, start the Ollama service, and pull the configured model:
-
-```powershell
-ollama serve
-ollama pull llama3.2
+```env
+DEBUG=True
+ALLOWED_HOSTS=127.0.0.1,localhost
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+CHROMA_DB_PATH=chroma_db
+MEDIA_ROOT=media
 ```
 
-The application uses Ollama at `http://localhost:11434/api` by default. Override `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in `.env` when needed. No API key or AWS credentials are required.
-
-## Run Django
-
-Apply migrations and start the development server:
+Apply migrations and run Django:
 
 ```powershell
 python manage.py migrate
 python manage.py runserver
 ```
 
-Open `http://127.0.0.1:8000/` in a browser. The local server serves uploaded media during development.
-
-Collect deployment static files with:
+Start Ollama in a separate terminal and download the local model:
 
 ```powershell
-python manage.py collectstatic --noinput
+ollama serve
+ollama pull llama3.2
 ```
 
-## Verify RAG and run tests
+Open `http://127.0.0.1:8000/` after the server starts.
 
-With Ollama running and at least one readable PDF note available:
+## Validation Commands
 
 ```powershell
-python manage.py verify_rag
-python manage.py test
 python manage.py check
 python manage.py check --deploy
+python -m pip check
+python manage.py collectstatic --noinput
+python manage.py test accounts dashboard ai_assistant.test_exam_mode ai_assistant.test_expected_questions ai_assistant.test_previous_year_analysis
 ```
 
-`verify_rag` exercises note indexing and student-isolated retrieval. Ollama-backed tests may require the local Ollama service; the test suite also contains mocked/failure-path coverage.
+The default `python manage.py test` discovery currently finds no tests because the AI suites use explicit `test_*.py` module names. Run the explicit command above for the current test coverage.
 
-## GitHub safety
+To verify one note and its retrieval, provide an existing note ID and question:
 
-The repository ignores Python caches, virtual environments, `.env`, SQLite databases, uploaded media, collected static files, persistent ChromaDB data, IDE files, OS metadata, logs, and coverage output. Source code, templates, static source files, migrations, and dependency manifests remain trackable.
+```powershell
+python manage.py verify_rag <note_id> --question "Explain the main concepts"
+```
 
-AWS/S3 is not required for local development. Local filesystem storage remains the active media backend.
+This command indexes the selected note before checking retrieval. Do not run it against important production data without a backup.
 
-## Future deployment
+## RAG Explanation
 
-For a hosting platform, provide environment variables through the platform’s secret/configuration manager. Set `DEBUG=False`, a strong `SECRET_KEY`, explicit `ALLOWED_HOSTS`, and appropriate `CSRF_TRUSTED_ORIGINS`. Configure a production database and writable/static storage paths as supported by the platform. Ensure Ollama and the configured model are available to the deployed application, or plan a separate compatible inference service; the project does not require AWS S3.
+1. A student uploads a PDF note.
+2. pypdf extracts readable text.
+3. The text is split into overlapping chunks.
+4. Sentence Transformers creates normalized embeddings.
+5. ChromaDB stores chunks with student, note, subject, semester, and unit metadata.
+6. A question performs similarity retrieval filtered to that student's metadata.
+7. Retrieved context is sent to Ollama with the question and supported conversation history.
+8. The generated grounded answer is returned to the student.
 
-## Deployment — Render
+The existing local ChromaDB directory is preserved for development and ignored by Git. Render's free filesystem is ephemeral, so persistent production vector storage requires separate infrastructure.
 
-This repository includes `render.yaml` and `build.sh` as a deployment starting point. Nothing is deployed by this project change.
+## Deployment
 
-1. Create a Render account and connect the GitHub repository.
-2. Create a Blueprint from the repository, or create a Python web service manually.
-3. Use this build command:
+The project is deployed as a Render Web Service using the free plan.
+
+Build command:
 
 ```text
-bash build.sh
+./build.sh
 ```
 
-4. Use this start command:
+Start command:
 
 ```text
 gunicorn vtu_genius.wsgi:application --bind 0.0.0.0:$PORT
 ```
 
-5. Set the required environment variables in Render:
+The service runs migrations and `collectstatic` during the build and exposes `/health/` for health checks. `render.yaml` contains the service configuration.
 
-- `SECRET_KEY`: generate a private random value, or let `render.yaml` generate it.
+Production configuration requires:
+
+- `SECRET_KEY`
 - `DEBUG=False`
-- `ALLOWED_HOSTS=.onrender.com` plus any custom hostnames.
-- `CSRF_TRUSTED_ORIGINS=https://your-service.onrender.com`.
-- `DATABASE_URL`: provide the Render PostgreSQL connection URL for persistent production data.
-- `OLLAMA_BASE_URL`: configure a separately hosted Ollama-compatible endpoint when production AI is added.
-- `OLLAMA_MODEL=llama3.2` unless the separate AI host uses another configured model.
-- `CHROMA_DB_PATH`: use a persistent mounted disk path if one is added later.
+- `ALLOWED_HOSTS`
+- `CSRF_TRUSTED_ORIGINS`
+- `DATABASE_URL` for a persistent PostgreSQL database when configured
+- `OLLAMA_BASE_URL` pointing to a publicly and reliably reachable Ollama-compatible endpoint
+- `OLLAMA_MODEL` set to a model available at that endpoint
+- `CHROMA_DB_PATH` set to an appropriate persistent path when persistent vector storage is provided
 
-The application still uses SQLite, local media, local ChromaDB, and local Ollama by default for development. Render's free filesystem is ephemeral: uploaded PDFs and ChromaDB data stored there are not permanent. Persistent media storage and persistent vector storage are separate future deployment work; this step does not add S3 or any other storage provider.
+Localhost Ollama works only for local development. Ollama is not hosted by this project on Render and is not installed by the Render build. Production AI requires a separately hosted reachable endpoint; no paid AI provider is required by the application.
 
-Ollama is not installed, hosted, or run by Render in this step. Production AI hosting will be handled separately later. The `/health/` endpoint is lightweight and does not require login, Ollama, ChromaDB, or a database query.
+Uploaded media, SQLite, and local ChromaDB data on Render's free filesystem are not permanent. Persistent production media, database, and vector storage require appropriate infrastructure. AWS/S3 is not currently required or configured.
+
+Current deployed application: https://vtu-genius.onrender.com
+
+## Project Structure
+
+```text
+accounts/                 Authentication, registration, and student profiles
+dashboard/                Dashboard and profile views
+notes/                    Note models, PDF upload, download, search, and deletion
+ai_assistant/             Ollama, RAG, exam features, and verification command
+templates/                Django HTML templates
+static/                   Source CSS and static assets
+vtu_genius/settings.py    Environment-driven Django configuration
+vtu_genius/urls.py        Root routes and /health/
+vtu_genius/wsgi.py        Gunicorn/WSGI entry point
+build.sh                  Render dependency, static, and migration build
+render.yaml               Render Web Service configuration
+requirements.txt          Pinned Python dependencies
+.env.example              Safe local configuration template
+```
+
+## Security and Data Boundaries
+
+- Secrets are read from environment variables; `.env` is ignored.
+- Production requires an explicit `SECRET_KEY` and can set `DEBUG=False`.
+- `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` are configurable.
+- Protected views require authentication.
+- Notes, conversations, and RAG retrieval are scoped to the current student.
+- Media uploads, SQLite, ChromaDB, virtual environments, caches, and collected static files are excluded from Git.
+
+## Future Enhancements
+
+- Add persistent production media and vector storage.
+- Connect a separately hosted Ollama-compatible inference service.
+- Expand automated authentication and end-to-end workflow coverage.
+- Configure a persistent production PostgreSQL database.

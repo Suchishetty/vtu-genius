@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class AIService:
-    model = settings.OLLAMA_MODEL
-    ollama_url = f"{settings.OLLAMA_BASE_URL}/chat"
-
     # Maximum amount of PDF text sent to Ollama for one question
     MAX_NOTE_CHARS = 10000
 
@@ -152,7 +149,17 @@ Answer only what is relevant to the student's question.
 """
 
     def __init__(self):
+        self.api_base_url = self._build_api_base_url(settings.OLLAMA_BASE_URL)
+        self.ollama_url = f"{self.api_base_url}/chat"
+        self.model = settings.OLLAMA_MODEL
         self._validate_configuration()
+
+    @staticmethod
+    def _build_api_base_url(base_url):
+        base_url = (base_url or "").strip().rstrip("/")
+        if base_url.endswith("/api"):
+            return base_url
+        return f"{base_url}/api"
 
     # ---------------------------------------------------------
     # CHECK OLLAMA
@@ -161,14 +168,18 @@ Answer only what is relevant to the student's question.
     def _validate_configuration(self):
         try:
             response = requests.get(
-                f"{settings.OLLAMA_BASE_URL}/tags",
+                f"{self.api_base_url}/tags",
                 timeout=5,
             )
             response.raise_for_status()
 
         except requests.RequestException as exc:
+            logger.error(
+                "Ollama availability check failed: %s",
+                type(exc).__name__,
+            )
             raise ImproperlyConfigured(
-                "Ollama is not running. Please start Ollama and try again."
+                "The AI service is unavailable. Please try again later."
             ) from exc
 
     # ---------------------------------------------------------
@@ -473,11 +484,11 @@ Answer only what is relevant to the student's question.
             logger.error(
                 "Ollama request failed after %.2f seconds: %s",
                 duration,
-                exc,
+                type(exc).__name__,
             )
 
             raise RuntimeError(
-                "Ollama request failed. Please make sure Ollama is running."
+                "The AI service is unavailable. Please try again later."
             ) from exc
 
         # -----------------------------------------------------
