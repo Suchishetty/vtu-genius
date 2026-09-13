@@ -23,6 +23,10 @@ services:
         value: llama3.2
       - key: CHROMA_DB_PATH
         value: /tmp/chroma_db
+      - key: RAG_ENABLED
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "1"
       - key: STATIC_ROOT
         value: staticfiles
       - key: MEDIA_ROOT

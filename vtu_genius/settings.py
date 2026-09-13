@@ -36,6 +36,8 @@ def env_list(name, default=""):
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env_bool("DEBUG", True)
+IS_RENDER = env_bool("RENDER", False) or bool(os.environ.get("RENDER_SERVICE_ID"))
+RAG_ENABLED = env_bool("RAG_ENABLED", not IS_RENDER)
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
 if not SECRET_KEY:

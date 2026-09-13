@@ -86,6 +86,7 @@ ALLOWED_HOSTS=127.0.0.1,localhost
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 CHROMA_DB_PATH=chroma_db
+RAG_ENABLED=True
 MEDIA_ROOT=media
 ```
 
@@ -138,6 +139,8 @@ This command indexes the selected note before checking retrieval. Do not run it 
 
 The existing local ChromaDB directory is preserved for development and ignored by Git. Render's free filesystem is ephemeral, so persistent production vector storage requires separate infrastructure.
 
+On Render Free, `RAG_ENABLED=False` prevents ChromaDB and Sentence Transformers from loading in the web worker. PDF uploads still save normally, and Ollama-backed pages remain available with their existing PDF-context fallback. Set `RAG_ENABLED=True` only when the deployment has enough memory and appropriate persistent vector storage.
+
 ## Deployment
 
 The project is deployed as a Render Web Service using the free plan.
@@ -156,6 +159,8 @@ gunicorn vtu_genius.wsgi:application --bind 0.0.0.0:$PORT
 
 The service runs migrations and `collectstatic` during the build and exposes `/health/` for health checks. `render.yaml` contains the service configuration.
 
+The Render Free service uses one Gunicorn worker (`WEB_CONCURRENCY=1`) and does not preload the Django application, avoiding duplicate model memory across workers.
+
 Production configuration requires:
 
 - `SECRET_KEY`
@@ -166,6 +171,7 @@ Production configuration requires:
 - `OLLAMA_BASE_URL` pointing to a publicly and reliably reachable Ollama-compatible endpoint
 - `OLLAMA_MODEL` set to a model available at that endpoint
 - `CHROMA_DB_PATH` set to an appropriate persistent path when persistent vector storage is provided
+- `RAG_ENABLED=False` on the Render Free plan unless the service has enough memory for ChromaDB and Sentence Transformers
 
 Localhost Ollama works only for local development. Ollama is not hosted by this project on Render and is not installed by the Render build. Production AI requires a separately hosted reachable endpoint; no paid AI provider is required by the application.
 

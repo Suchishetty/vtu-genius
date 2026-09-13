@@ -22,7 +22,13 @@ class RAGService:
     max_pdf_chars = 200000
     _embedding_model = None
 
+    @staticmethod
+    def _is_enabled():
+        return settings.RAG_ENABLED
+
     def __init__(self):
+        if not self._is_enabled():
+            raise RuntimeError("RAG indexing is disabled in this environment.")
         import chromadb
 
         database_path = Path(settings.CHROMA_DB_PATH)
@@ -93,6 +99,13 @@ class RAGService:
 
     def index_note(self, note):
         """Extract, chunk, embed, and persist one note. Safe to call on re-upload."""
+        if not self._is_enabled():
+            logger.info(
+                "RAG indexing skipped for note_id=%s because RAG_ENABLED=False",
+                note.pk,
+            )
+            return 0
+
         text = self._extract_note_text(note)
         chunks = self._split_text(text)
         if not chunks:
@@ -119,6 +132,13 @@ class RAGService:
 
     def delete_note_from_index(self, note):
         """Remove all vector chunks for a note without touching other students' data."""
+        if not self._is_enabled():
+            logger.info(
+                "RAG index cleanup skipped for note_id=%s because RAG_ENABLED=False",
+                note.pk,
+            )
+            return
+
         self.collection.delete(
             where={
                 "$and": [
@@ -139,6 +159,12 @@ class RAGService:
         unit=None,
     ):
         """Return chunks filtered by student and optional note metadata."""
+        if not self._is_enabled():
+            logger.info(
+                "RAG retrieval skipped for student_id=%s because RAG_ENABLED=False",
+                student_profile.pk,
+            )
+            return []
         if not question or not question.strip():
             return []
         filters = [{"student_id": str(student_profile.pk)}]
