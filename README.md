@@ -2,6 +2,18 @@
 
 VTU Genius is a Django study assistant for VTU students. It combines personal PDF notes, student-isolated retrieval-augmented generation, local Ollama responses, and exam-focused revision tools.
 
+## 🚀 Live Demo
+
+https://vtu-genius.onrender.com/
+
+## 🛠️ Tech Stack
+
+- Python
+- Django
+- ChromaDB
+- RAG
+- Ollama
+- Llama 3.2
 ## Features
 
 - Student authentication and profiles
