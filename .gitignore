@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual Environment
 venv/
@@ -9,8 +12,10 @@ venv/
 
 # Django
 db.sqlite3
+*.sqlite3
 media/
 staticfiles/
+chroma_db/
 
 # IDE
 .vscode/
@@ -22,6 +27,8 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
+*.pid
 
 # Environment Variables
 .env

@@ -13,6 +13,11 @@ from accounts.models import StudentProfile
 
 from .forms import UploadNotesForm
 from .models import Notes
+from ai_assistant.rag_service import RAGService
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class UploadNotesView(LoginRequiredMixin, CreateView):
@@ -34,6 +39,11 @@ class UploadNotesView(LoginRequiredMixin, CreateView):
 
         form.instance.student = student_profile
         response = super().form_valid(form)
+        try:
+            RAGService().index_note(self.object)
+        except Exception:
+            # A note is already safely stored; vector indexing can be retried later.
+            logger.exception("RAG indexing failed for note_id=%s", self.object.pk)
         messages.success(self.request, "Notes uploaded successfully.")
         return response
 
@@ -105,6 +115,11 @@ class DeleteNotesView(LoginRequiredMixin, View):
 
     def post(self, request, pk, *args, **kwargs):
         note = get_object_or_404(self.get_queryset(), pk=pk)
+        try:
+            RAGService().delete_note_from_index(note)
+        except Exception:
+            # Do not prevent a student from deleting their uploaded file.
+            logger.exception("RAG index cleanup failed for note_id=%s", note.pk)
         note.delete()
         messages.success(self.request, "Notes deleted successfully.")
         return redirect("notes:my_notes")

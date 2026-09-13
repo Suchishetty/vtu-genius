@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Expected Exam Questions - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .expected-page { padding: .5rem 0 2rem; }
+    .expected-header { background: linear-gradient(135deg, #0d6efd, #124e96); color: #fff; border-radius: 1rem; padding: 1.6rem 1.8rem; margin-bottom: 1.25rem; }
+    .expected-header h1 { font-weight: 700; margin-bottom: .4rem; }
+    .expected-header p { margin: 0; color: rgba(255,255,255,.9); }
+    .expected-panel { border: 0; border-radius: .9rem; box-shadow: 0 10px 25px rgba(15,23,42,.08); }
+    .expected-panel .card-body { padding: 1.35rem; }
+    .expected-panel .form-label { color: #173f70; font-weight: 600; }
+    .expected-panel .form-select { border-color: #cfe0ff; border-radius: .65rem; padding: .7rem; }
+    .prediction-note { background: #fff8e1; border-left: 4px solid #f0ad00; color: #765600; padding: .7rem .9rem; border-radius: .35rem; }
+    .priority-section + .priority-section { margin-top: 1.25rem; }
+    .priority-heading { font-size: .8rem; letter-spacing: .08em; font-weight: 800; color: #0d6efd; margin-bottom: .55rem; }
+    .expected-item { border-bottom: 1px solid #e4ecf7; padding: .85rem 0; }
+    .expected-item:last-child { border-bottom: 0; }
+    .expected-number { color: #0d6efd; font-weight: 800; min-width: 1.8rem; }
+    .expected-text { color: #183a61; line-height: 1.45; }
+    .expected-meta { color: #647b99; font-size: .86rem; }
+    .priority-badge { font-size: .7rem; padding: .25rem .45rem; border-radius: .35rem; }
+    @media (max-width: 767.98px) { .expected-header, .expected-panel .card-body { padding: 1.15rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="expected-page">
+    <section class="expected-header">
+        <span class="badge bg-light text-primary mb-2"><i class="bi bi-lightning-charge-fill me-1"></i> Note-grounded predictions</span>
+        <h1>Expected Exam Questions</h1>
+        <p>AI-generated predictions based on your uploaded notes. These are not guaranteed exam questions.</p>
+    </section>
+
+    <div class="card expected-panel mb-4">
+        <div class="card-body">
+            {% if has_notes %}
+            <form method="post" id="expected-questions-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="{{ form.subject.id_for_label }}">Subject</label>
+                        {{ form.subject }}
+                        {% if form.subject.errors %}<div class="text-danger small">{{ form.subject.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="{{ form.unit.id_for_label }}">Unit</label>
+                        {{ form.unit }}
+                        {% if form.unit.errors %}<div class="text-danger small">{{ form.unit.errors|striptags }}</div>{% endif %}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="{{ form.marks.id_for_label }}">Marks</label>
+                        {{ form.marks }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="{{ form.question_count.id_for_label }}">Number of expected questions</label>
+                        {{ form.question_count }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-4"><i class="bi bi-stars me-2"></i>Generate Expected Questions</button>
+            </form>
+            {% else %}
+            <div class="text-center py-3">
+                <i class="bi bi-journal-x fs-1 text-primary"></i>
+                <h2 class="h5 mt-3">No uploaded notes available</h2>
+                <p class="text-muted mb-3">Upload notes before generating predictions.</p>
+                <a class="btn btn-primary" href="{% url 'notes:upload' %}">Upload Notes</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if generation_error %}<div class="alert alert-warning">{{ generation_error }}</div>{% endif %}
+
+    {% if generated_questions %}
+    <div class="card expected-panel">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 text-primary fw-bold mb-0">High-priority expected questions</h2>
+                <span class="text-muted small">{{ selected_subject }} &middot; {{ selected_unit }} &middot; {{ selected_marks }}</span>
+            </div>
+            <div class="prediction-note mb-3"><i class="bi bi-exclamation-triangle me-1"></i> Prediction based on uploaded notes. Not guaranteed.</div>
+            {% regroup generated_questions by priority as priority_groups %}
+            {% for group in priority_groups %}
+            <section class="priority-section">
+                <div class="priority-heading">{{ group.grouper }} PRIORITY</div>
+                {% for question in group.list %}
+                <article class="expected-item d-flex gap-2 align-items-start">
+                    <span class="expected-number">{{ question.number }}.</span>
+                    <div class="flex-grow-1">
+                        <div class="expected-text">{{ question.text }}</div>
+                        <div class="expected-meta mt-1"><span class="priority-badge bg-light text-primary">{{ question.marks|default:"Marks as supported by notes" }}</span> &middot; Why important: {{ question.reason }}</div>
+                    </div>
+                </article>
+                {% endfor %}
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{{ subject_units|json_script:"subject-units" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const subjectUnits = JSON.parse(document.getElementById('subject-units').textContent);
+    const subjectSelect = document.getElementById('id_subject');
+    const unitSelect = document.getElementById('id_unit');
+    if (subjectSelect && unitSelect) {
+        subjectSelect.addEventListener('change', () => {
+            const currentUnit = unitSelect.value;
+            unitSelect.innerHTML = '<option value="all">All Units</option>';
+            (subjectUnits[subjectSelect.value] || []).forEach((unit) => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+            if ([...unitSelect.options].some((option) => option.value === currentUnit)) {
+                unitSelect.value = currentUnit;
+            }
+        });
+    }
+</script>
+{% endblock %}

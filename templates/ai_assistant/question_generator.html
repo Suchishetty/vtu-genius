@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Question Generator - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .generator-page { padding: 0.5rem 0 2rem; }
+    .generator-hero {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 55%, #dbeafe 100%);
+        color: #fff; border-radius: 1.25rem; padding: 2rem; margin-bottom: 1.75rem;
+        box-shadow: 0 18px 42px rgba(13, 110, 253, 0.18);
+    }
+    .generator-hero h1 { font-weight: 700; margin-bottom: 0.5rem; }
+    .generator-hero p { margin: 0; color: rgba(255, 255, 255, 0.92); }
+    .generator-card, .questions-card { border: 0; border-radius: 1rem; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); }
+    .generator-card .card-body, .questions-card .card-body { padding: 1.5rem; }
+    .form-label { color: #0f3f7c; font-weight: 600; }
+    .form-select { border-color: #cfe0ff; border-radius: 0.75rem; padding: 0.75rem; }
+    .question-item { border: 1px solid #dbe8ff; border-radius: 0.85rem; padding: 1rem; background: #f8fbff; }
+    .question-number { min-width: 2rem; height: 2rem; border-radius: 50%; background: #0d6efd; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+    .question-text { color: #1f3d66; font-size: 1.04rem; line-height: 1.6; }
+    .question-meta { color: #5a7398; font-size: 0.88rem; }
+    @media (max-width: 767.98px) {
+        .generator-hero, .generator-card .card-body, .questions-card .card-body { padding: 1.25rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="generator-page">
+    <section class="generator-hero">
+        <span class="badge bg-light text-primary rounded-pill px-3 py-2 mb-3"><i class="bi bi-patch-question-fill me-1"></i> VTU Exam Preparation</span>
+        <h1>AI Question Generator</h1>
+        <p>Generate exam-oriented questions only from the note you select.</p>
+    </section>
+
+    <div class="card generator-card mb-4">
+        <div class="card-body">
+            {% if form.fields.note.queryset.exists %}
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                    <div class="row g-3">
+                        {% for field in form %}
+                            <div class="col-12 col-md-6{% if field.name == 'note' %} col-lg-12{% endif %}">
+                                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|striptags }}</div>{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-4 px-4 py-2"><i class="bi bi-stars me-2"></i>Generate Questions</button>
+                </form>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-journal-x fs-1 text-primary"></i>
+                    <h2 class="h5 mt-3">No uploaded notes available</h2>
+                    <p class="text-muted mb-3">Upload a note before generating questions.</p>
+                    <a class="btn btn-primary" href="{% url 'notes:upload' %}">Upload Notes</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if generation_error %}
+        <div class="alert alert-warning">{{ generation_error }}</div>
+    {% endif %}
+
+    {% if generated_questions %}
+        <div class="card questions-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-3">
+                    <h2 class="h4 text-primary fw-bold mb-0"><i class="bi bi-list-ol me-2"></i>Generated Questions</h2>
+                    <span class="text-muted small">Based only on the selected uploaded note</span>
+                </div>
+                <div class="d-grid gap-3">
+                    {% for question in generated_questions %}
+                        <article class="question-item">
+                            <div class="d-flex gap-3 align-items-start">
+                                <span class="question-number">{{ question.number }}</span>
+                                <div>
+                                    <div class="question-text">{{ question.text }}</div>
+                                    <div class="question-meta mt-2">{{ question.marks }} marks &middot; {{ question.subject }} &middot; {{ question.unit }}</div>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

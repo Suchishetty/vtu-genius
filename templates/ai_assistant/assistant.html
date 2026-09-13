@@ -1,0 +1,459 @@
+{% extends "base.html" %}
+
+{% block title %}VTU Genius AI Assistant{% endblock %}
+
+{% block extra_css %}
+<style>
+    .assistant-page {
+        padding: 0.5rem 0 2rem;
+    }
+
+    .assistant-hero {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 55%, #dbeafe 100%);
+        color: #fff;
+        border-radius: 1.25rem;
+        padding: 2rem;
+        box-shadow: 0 18px 42px rgba(13, 110, 253, 0.18);
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .assistant-hero::after {
+        content: "";
+        position: absolute;
+        top: -30px;
+        right: -35px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .assistant-hero h1 {
+        font-size: clamp(1.9rem, 4vw, 2.6rem);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .assistant-hero p {
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.92);
+        max-width: 42rem;
+    }
+
+    .assistant-shell {
+        border: 0;
+        border-radius: 1.25rem;
+        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+        overflow: hidden;
+    }
+
+    .assistant-shell .card-header {
+        background: #ffffff;
+        border-bottom: 1px solid #dbe8ff;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .assistant-shell .card-body {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        padding: 1.5rem;
+    }
+
+    .chat-window {
+        background: #f3f8ff;
+        border: 1px solid #d7e6ff;
+        border-radius: 1rem;
+        padding: 1rem;
+        height: clamp(380px, 58vh, 640px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scroll-behavior: smooth;
+    }
+
+    .message-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: 100%;
+        justify-content: flex-end;
+    }
+
+    .message-row {
+        display: flex;
+    }
+
+    .message-row.user-row {
+        justify-content: flex-end;
+    }
+
+    .message-row.assistant-row {
+        justify-content: flex-start;
+    }
+
+    .message-bubble {
+        max-width: min(85%, 760px);
+        border-radius: 1rem;
+        padding: 0.75rem 0.9rem;
+    }
+
+    .message-bubble.user-bubble {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+        color: #fff;
+        border-bottom-right-radius: 0.35rem;
+    }
+
+    .message-bubble.assistant-bubble {
+        background: #ffffff;
+        color: #1f3d66;
+        border: 1px solid #dbe8ff;
+        border-bottom-left-radius: 0.35rem;
+    }
+
+    .message-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.45rem;
+    }
+
+    .message-content {
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .user-bubble .message-content {
+        white-space: pre-wrap;
+    }
+
+    .message-content p {
+        margin: 0 0 0.75rem;
+    }
+
+    .message-content p:last-child,
+    .message-content ul:last-child,
+    .message-content ol:last-child,
+    .message-content pre:last-child {
+        margin-bottom: 0;
+    }
+
+    .message-content ul,
+    .message-content ol {
+        margin: 0 0 0.75rem;
+        padding-left: 1.35rem;
+    }
+
+    .message-content h1,
+    .message-content h2,
+    .message-content h3,
+    .message-content h4 {
+        color: #0f3f7c;
+        font-weight: 700;
+        margin: 1rem 0 0.5rem;
+    }
+
+    .message-content h1 { font-size: 1.35rem; }
+    .message-content h2 { font-size: 1.2rem; }
+    .message-content h3 { font-size: 1.08rem; }
+    .message-content h4 { font-size: 1rem; }
+
+    .message-content pre {
+        white-space: pre;
+        overflow-x: auto;
+        margin: 0 0 0.75rem;
+        padding: 0.85rem;
+        border-radius: 0.6rem;
+        background: #f1f5f9;
+        border: 1px solid #dbe8ff;
+        color: #1e293b;
+        font-family: var(--bs-font-monospace);
+        line-height: 1.35;
+    }
+
+    .empty-state {
+        min-height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        color: #4c678f;
+        border: 2px dashed #b9cff7;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.75);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #0d6efd;
+        margin-bottom: 0.9rem;
+        display: inline-block;
+    }
+
+    .composer-card {
+        margin-top: 1.5rem;
+        border: 0;
+        border-radius: 1rem;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .composer-card .card-body {
+        padding: 1.25rem;
+        background: #ffffff;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #0f3f7c;
+    }
+
+    .form-control {
+        border-radius: 0.9rem;
+        border: 1px solid #cfe0ff;
+        padding: 0.95rem 1rem;
+        box-shadow: none;
+    }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    .assistant-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+
+    .assistant-actions .btn {
+        border-radius: 0.85rem;
+        font-weight: 600;
+        padding: 0.8rem 1.2rem;
+    }
+
+    .loading-hint {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: #5a7398;
+        font-size: 0.92rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .assistant-page {
+            padding-top: 0;
+        }
+
+        .assistant-hero,
+        .assistant-shell .card-header,
+        .assistant-shell .card-body {
+            padding: 1.25rem;
+        }
+
+        .chat-window {
+            height: clamp(320px, 52vh, 500px);
+            padding: 0.85rem;
+        }
+
+        .message-bubble {
+            max-width: 100%;
+        }
+
+        .assistant-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .assistant-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assistant-page">
+    <section class="assistant-hero">
+        <span class="badge bg-light text-primary rounded-pill px-3 py-2 mb-3">
+            <i class="bi bi-robot me-1"></i> AI Exam Assistant
+        </span>
+        <h1>VTU Genius AI Assistant</h1>
+        <p>Ask questions and get help with your VTU exam preparation.</p>
+    </section>
+
+    <div class="card assistant-shell">
+        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+            <div>
+                <h2 class="h4 mb-1 text-primary fw-bold">
+                    <i class="bi bi-chat-dots-fill me-2"></i>
+                    Study Chat
+                </h2>
+                <p class="text-muted mb-0">Your messages stay linked to your student account.</p>
+            </div>
+            <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left-circle me-2"></i>
+                Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card-body">
+            <div class="chat-window">
+                {% if conversation_messages %}
+                    <div class="message-list">
+                        {% for message in conversation_messages %}
+                            <div class="message-row {% if message.role == 'user' %}user-row{% else %}assistant-row{% endif %}">
+                                <div class="message-bubble {% if message.role == 'user' %}user-bubble{% else %}assistant-bubble{% endif %}">
+                                    <div class="message-meta">
+                                        {% if message.role == 'user' %}
+                                            <i class="bi bi-person-circle"></i>
+                                            <span>You</span>
+                                        {% else %}
+                                            <i class="bi bi-robot"></i>
+                                            <span>AI Assistant</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-content{% if message.role == 'assistant' %} assistant-markdown{% endif %}">{{ message.content }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div>
+                            <i class="bi bi-journal-text"></i>
+                            <h3 class="h5 fw-bold text-primary mb-2">No messages yet</h3>
+                            <p class="mb-0">Ask your first question to start studying with VTU Genius AI.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card composer-card">
+                <div class="card-body">
+                    <form method="post" action="{% url 'ai_assistant:ask_ai' %}">
+                        {% csrf_token %}
+                        <label for="id_message" class="form-label">Your Question</label>
+                        <textarea
+                            id="id_message"
+                            name="message"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Ask about subjects, units, concepts, or exam preparation..."
+                            required
+                        ></textarea>
+
+                        <div class="assistant-actions">
+                            <div class="loading-hint">
+                                <span class="spinner-grow spinner-grow-sm text-primary" role="status" aria-hidden="true"></span>
+                                <span>Ask anything about your VTU subjects, concepts, or exam preparation.</span>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send-fill me-2"></i>
+                                Ask AI
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (() => {
+        const escapeHtml = (value) => value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+        const inlineMarkdown = (value) => escapeHtml(value)
+            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+            .replace(/`([^`]+)`/g, "<code>$1</code>");
+
+        const renderMarkdown = (source) => {
+            const lines = source.replace(/\r\n/g, "\n").split("\n");
+            const output = [];
+            let index = 0;
+
+            while (index < lines.length) {
+                const line = lines[index];
+
+                if (line.trim().startsWith("```")) {
+                    const codeLines = [];
+                    index += 1;
+                    while (index < lines.length && !lines[index].trim().startsWith("```")) {
+                        codeLines.push(lines[index]);
+                        index += 1;
+                    }
+                    if (index < lines.length) index += 1;
+                    output.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`);
+                    continue;
+                }
+
+                const heading = line.match(/^(#{1,4})\s+(.+)$/);
+                if (heading) {
+                    const level = heading[1].length;
+                    output.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
+                    index += 1;
+                    continue;
+                }
+
+                const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
+                const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+                if (unordered || ordered) {
+                    const isOrdered = Boolean(ordered);
+                    const items = [];
+                    while (index < lines.length) {
+                        const item = isOrdered
+                            ? lines[index].match(/^\s*\d+[.)]\s+(.+)$/)
+                            : lines[index].match(/^\s*[-*+]\s+(.+)$/);
+                        if (!item) break;
+                        items.push(`<li>${inlineMarkdown(item[1])}</li>`);
+                        index += 1;
+                    }
+                    output.push(`<${isOrdered ? "ol" : "ul"}>${items.join("")}</${isOrdered ? "ol" : "ul"}>`);
+                    continue;
+                }
+
+                if (!line.trim()) {
+                    index += 1;
+                    continue;
+                }
+
+                const paragraph = [line];
+                index += 1;
+                while (index < lines.length && lines[index].trim()
+                    && !lines[index].trim().startsWith("```")
+                    && !/^(#{1,4})\s+/.test(lines[index])
+                    && !/^\s*(?:[-*+]|\d+[.)])\s+/.test(lines[index])) {
+                    paragraph.push(lines[index]);
+                    index += 1;
+                }
+                output.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
+            }
+
+            return output.join("");
+        };
+
+        document.querySelectorAll(".assistant-markdown").forEach((element) => {
+            element.innerHTML = renderMarkdown(element.textContent);
+        });
+
+        const chatWindow = document.querySelector(".chat-window");
+        if (chatWindow) {
+            requestAnimationFrame(() => {
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            });
+        }
+    })();
+</script>
+{% endblock %}

@@ -230,14 +230,15 @@
     </style>
     
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% load static %}{% static 'css/app.css' %}">
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top app-navbar">
         <div class="container-fluid">
             <!-- Logo & Home -->
             <a class="navbar-brand" href="{% url 'accounts:home' %}">
-                <i class="bi bi-mortarboard-fill"></i>
+                <span class="brand-mark"><i class="bi bi-stars"></i></span>
                 VTU Genius
             </a>
             
@@ -249,56 +250,62 @@
             
             <!-- Navigation Links -->
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <!-- Home Link -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'accounts:home' %}">
-                            <i class="bi bi-house-door"></i> Home
-                        </a>
-                    </li>
-                    
-                    <!-- Guest User Links -->
-                    {% if not user.is_authenticated %}
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    {% if user.is_authenticated %}
+                        <!-- Authenticated student navigation -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'accounts:home' %}">
+                                <i class="bi bi-house-door"></i> Home
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:register' %}">
-                                <i class="bi bi-person-plus"></i> Register
-                            </a>
-                        </li>
-                    {% else %}
-                        <!-- Authenticated User Links -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard:dashboard' %}">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard:dashboard' %}">
                                 <i class="bi bi-speedometer2"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'notes:upload' %}">
-                                <i class="bi bi-cloud-arrow-up"></i> Upload Notes
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-book me-1"></i> Study</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'notes:my_notes' %}"><i class="bi bi-collection me-2"></i>My Notes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'notes:upload' %}"><i class="bi bi-cloud-arrow-up me-2"></i>Upload Notes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'ai_assistant:assistant' %}"><i class="bi bi-robot me-2"></i>AI Assistant</a></li>
+                                <li><a class="dropdown-item" href="{% url 'ai_assistant:question_generator' %}"><i class="bi bi-patch-question me-2"></i>Question Generator</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-lightning-charge me-1"></i> Exam</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'ai_assistant:expected_questions' %}"><i class="bi bi-lightning-charge me-2"></i>Expected Questions</a></li>
+                                <li><a class="dropdown-item" href="{% url 'ai_assistant:previous_year_analysis' %}"><i class="bi bi-bar-chart-line me-2"></i>Previous-Year Analysis</a></li>
+                                <li><a class="dropdown-item" href="{% url 'ai_assistant:exam_mode' %}"><i class="bi bi-stopwatch me-2"></i>Exam Mode</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="nav-avatar"><i class="bi bi-person-fill"></i></span><span class="d-lg-none">Account</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'dashboard:profile' %}"><i class="bi bi-person-circle me-2"></i>Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Public navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">
+                                <i class="bi bi-person-plus"></i> Get Started
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'notes:my_notes' %}">
-                                <i class="bi bi-collection"></i> My Notes
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard:profile' %}">
-                                <i class="bi bi-person-circle"></i> Profile
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-outline-light btn-sm">
-                                    <i class="bi bi-box-arrow-right me-1"></i>
-                                    Logout
-                                </button>
-                            </form>
                         </li>
                     {% endif %}
                 </ul>

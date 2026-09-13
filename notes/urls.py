@@ -8,6 +8,11 @@ app_name = "notes"
 
 urlpatterns = [
     path(
+        "",
+        views.MyNotesView.as_view(),
+        name="index",
+    ),
+    path(
         "upload/",
         views.UploadNotesView.as_view(),
         name="upload",

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Previous-Year Question Analysis - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analysis-page { padding: .5rem 0 2rem; }
+    .analysis-header { background: linear-gradient(135deg, #0d6efd, #124e96); color: #fff; border-radius: 1rem; padding: 1.6rem 1.8rem; margin-bottom: 1.25rem; }
+    .analysis-header h1 { font-weight: 700; margin-bottom: .4rem; }
+    .analysis-header p { margin: 0; color: rgba(255,255,255,.9); }
+    .analysis-panel { border: 0; border-radius: .9rem; box-shadow: 0 10px 25px rgba(15,23,42,.08); }
+    .analysis-panel .card-body { padding: 1.35rem; }
+    .analysis-panel .form-label { color: #173f70; font-weight: 600; }
+    .analysis-panel .form-control, .analysis-panel .form-select { border-color: #cfe0ff; border-radius: .65rem; padding: .7rem; }
+    .section-title { color: #124e96; font-size: 1rem; font-weight: 800; margin-bottom: .7rem; }
+    .analysis-section + .analysis-section { margin-top: 1.5rem; }
+    .analysis-row { border-bottom: 1px solid #e4ecf7; padding: .75rem 0; }
+    .analysis-row:last-child { border-bottom: 0; }
+    .analysis-question { color: #183a61; line-height: 1.45; }
+    .analysis-meta { color: #647b99; font-size: .86rem; }
+    .trend-line { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #edf2f8; padding: .5rem 0; }
+    .trend-line:last-child { border-bottom: 0; }
+    .muted-note { background: #f4f7fb; border-left: 4px solid #8ba5c4; color: #526b89; padding: .7rem .9rem; border-radius: .35rem; }
+    .paper-row { border-bottom: 1px solid #edf2f8; padding: .55rem 0; }
+    .paper-row:last-child { border-bottom: 0; }
+    @media (max-width: 767.98px) { .analysis-header, .analysis-panel .card-body { padding: 1.15rem; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-page">
+    <section class="analysis-header">
+        <span class="badge bg-light text-primary mb-2"><i class="bi bi-bar-chart-line-fill me-1"></i> VTU exam trends</span>
+        <h1>Previous-Year Question Analysis</h1>
+        <p>Analyze previous VTU question papers to identify repeated questions, important topics, and exam trends.</p>
+    </section>
+
+    <div class="card analysis-panel mb-4">
+        <div class="card-body">
+            <h2 class="section-title"><i class="bi bi-file-earmark-arrow-up me-2"></i>Upload a question paper</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upload">
+                {% if upload_form.non_field_errors %}<div class="alert alert-danger">{{ upload_form.non_field_errors }}</div>{% endif %}
+                <div class="row g-3">
+                    {% for field in upload_form %}
+                    <div class="col-12 col-md-6{% if field.name == 'pdf' %} col-lg-12{% endif %}">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|striptags }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-primary mt-3" type="submit"><i class="bi bi-upload me-2"></i>Upload Paper</button>
+            </form>
+        </div>
+    </div>
+
+    {% if has_papers %}
+    <div class="card analysis-panel mb-4">
+        <div class="card-body">
+            <h2 class="section-title"><i class="bi bi-funnel me-2"></i>Analyze uploaded papers</h2>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="analyze">
+                {% if analysis_form.non_field_errors %}<div class="alert alert-danger">{{ analysis_form.non_field_errors }}</div>{% endif %}
+                <div class="row g-3">
+                    {% for field in analysis_form %}
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|striptags }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="btn btn-primary mt-3" type="submit"><i class="bi bi-bar-chart me-2"></i>Analyze Papers</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if analysis_error %}<div class="alert alert-warning">{{ analysis_error }}</div>{% endif %}
+
+    {% if analysis %}
+    <div class="card analysis-panel">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 text-primary fw-bold mb-0">Analysis: {{ selected_subject }}</h2>
+                <span class="text-muted small">Papers analyzed: {{ analysis.papers_analyzed }} &middot; Questions: {{ analysis.question_count }}</span>
+            </div>
+            {% if analysis.papers_analyzed == 1 %}
+            <div class="muted-note mb-3">One paper analyzed. This shows extraction and basic statistics; repetition analysis needs multiple papers.</div>
+            {% endif %}
+            {% if not analysis.semantic_grouping_available %}
+            <div class="muted-note mb-3">Topic grouping used local wording analysis because semantic grouping was unavailable. Historical data remains based only on your uploaded papers.</div>
+            {% endif %}
+
+            <section class="analysis-section">
+                <h3 class="section-title">Frequently appeared questions</h3>
+                {% if analysis.repeated_questions %}
+                    {% for item in analysis.repeated_questions %}
+                    <div class="analysis-row">
+                        <div class="analysis-question">{{ forloop.counter }}. {{ item.question }}</div>
+                        <div class="analysis-meta">Appeared {{ item.paper_count }} times across papers &middot; Years: {{ item.years|join:", " }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="muted-note">No repeated questions found in the selected papers.</div>
+                {% endif %}
+            </section>
+
+            <section class="analysis-section">
+                <h3 class="section-title">Frequent topics</h3>
+                {% if analysis.topics %}
+                    {% for item in analysis.topics %}
+                    <div class="analysis-row">
+                        <div class="analysis-question">{{ forloop.counter }}. {{ item.topic }}</div>
+                        <div class="analysis-meta">{{ item.appearances }} appearance{{ item.appearances|pluralize }} &middot; Years: {{ item.years|join:", " }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}<div class="muted-note">No topics could be extracted.</div>{% endif %}
+            </section>
+
+            <div class="row g-4 analysis-section">
+                <section class="col-12 col-lg-6">
+                    <h3 class="section-title">Unit-wise trend</h3>
+                    {% if analysis.unit_mapping_available %}
+                        {% for unit, count in analysis.unit_trends.items %}<div class="trend-line"><span>{{ unit }}</span><strong>{{ count }} question{{ count|pluralize }}</strong></div>{% endfor %}
+                    {% else %}<div class="muted-note">Unit mapping is unavailable. No unit numbers were guessed.</div>{% endif %}
+                </section>
+                <section class="col-12 col-lg-6">
+                    <h3 class="section-title">Marks trend</h3>
+                    {% for marks, count in analysis.marks_trends.items %}<div class="trend-line"><span>{{ marks }} Marks</span><strong>{{ count }}</strong></div>{% endfor %}
+                    <div class="analysis-meta mt-2">Only explicitly identified marks are counted.</div>
+                </section>
+            </div>
+
+            <section class="analysis-section">
+                <h3 class="section-title">Year-wise questions</h3>
+                {% for year, questions in analysis.year_questions.items %}
+                <div class="analysis-row"><strong>{{ year }}</strong><div class="analysis-meta mt-1">{{ questions|join:" | " }}</div></div>
+                {% endfor %}
+            </section>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if has_papers %}
+    <div class="card analysis-panel mt-4">
+        <div class="card-body">
+            <h2 class="section-title">Your uploaded papers</h2>
+            {% for paper in papers %}
+            <div class="paper-row d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <span><strong>{{ paper.subject }}</strong> &middot; {{ paper.year }} &middot; {{ paper.get_exam_type_display }}</span>
+                {% if paper.extraction_error %}<span class="text-warning small">{{ paper.extraction_error }}</span>{% else %}<span class="text-success small">{{ paper.extracted_questions|length }} questions extracted</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

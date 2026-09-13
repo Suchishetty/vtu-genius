@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}One-Day-Before Exam Mode - VTU Genius{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-mode-page { padding: .5rem 0 2rem; }
+    .exam-mode-header { background: linear-gradient(135deg, #0d6efd, #124e96); color: #fff; border-radius: 1rem; padding: 1.6rem 1.8rem; margin-bottom: 1.25rem; }
+    .exam-mode-header h1 { font-weight: 700; margin-bottom: .4rem; }
+    .exam-mode-header p { margin: 0; color: rgba(255,255,255,.9); }
+    .exam-panel { border: 0; border-radius: .9rem; box-shadow: 0 10px 25px rgba(15,23,42,.08); }
+    .exam-panel .card-body { padding: 1.35rem; }
+    .exam-panel .form-label { color: #173f70; font-weight: 600; }
+    .exam-panel .form-control, .exam-panel .form-select { border-color: #cfe0ff; border-radius: .65rem; padding: .7rem; }
+    .section-title { color: #124e96; font-size: 1rem; font-weight: 800; margin-bottom: .7rem; }
+    .priority-topic { border-bottom: 1px solid #e4ecf7; padding: .8rem 0; }
+    .priority-topic:last-child { border-bottom: 0; }
+    .topic-name { color: #183a61; line-height: 1.45; }
+    .topic-meta { color: #647b99; font-size: .85rem; }
+    .priority-badge { font-size: .7rem; padding: .25rem .45rem; border-radius: .35rem; }
+    .schedule-row { border-bottom: 1px solid #edf2f8; padding: .7rem 0; }
+    .schedule-row:last-child { border-bottom: 0; }
+    .schedule-time { color: #0d6efd; font-weight: 700; min-width: 105px; }
+    .schedule-break { color: #7a8797; background: #f6f8fb; }
+    .checklist li { margin-bottom: .55rem; color: #38536f; }
+    .source-note { background: #f4f7fb; border-left: 4px solid #8ba5c4; color: #526b89; padding: .7rem .9rem; border-radius: .35rem; }
+    @media (max-width: 767.98px) { .exam-mode-header, .exam-panel .card-body { padding: 1.15rem; } .schedule-time { min-width: 85px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-mode-page">
+    <section class="exam-mode-header">
+        <span class="badge bg-light text-primary mb-2"><i class="bi bi-stopwatch-fill me-1"></i> Focused revision</span>
+        <h1>One-Day-Before Exam Mode</h1>
+        <p>Create a focused last-day revision plan using your uploaded notes, previous-year question trends, and AI analysis.</p>
+    </section>
+
+    <div class="card exam-panel mb-4">
+        <div class="card-body">
+            <h2 class="section-title"><i class="bi bi-calendar2-check me-2"></i>Exam information</h2>
+            {% if has_notes %}
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="row g-3">
+                    {% for field in form %}
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|striptags }}</div>{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="topic-meta mt-2">Plans are designed for approximately one day before the exam. Longer lead time will show a friendly reminder.</div>
+                <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-stars me-2"></i>Generate Plan</button>
+            </form>
+            {% else %}
+            <div class="source-note">Upload notes for a subject before creating an exam plan. Notes remain the source of truth for technical content.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if generation_error %}<div class="alert alert-warning">{{ generation_error }}</div>{% endif %}
+    {% if exam_date_warning %}<div class="alert alert-info">That exam date is more than a day away. This plan is still a focused revision guide, but you may want a broader study plan for the extra time.</div>{% endif %}
+
+    {% if plan %}
+    <div class="card exam-panel">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="h5 text-primary fw-bold mb-0">One-day revision plan</h2>
+                <span class="topic-meta">{{ plan.subject }} &middot; Exam: {{ plan.exam_date }} &middot; {{ plan.hours }} hours available</span>
+            </div>
+            <div class="source-note mb-4">{{ plan.previous_year_message }} Technical content is based on your uploaded notes. This plan contains study priorities, not guaranteed exam predictions.</div>
+
+            <section class="mb-4">
+                <h3 class="section-title">Priority topics</h3>
+                {% for topic in plan.topics %}
+                <article class="priority-topic">
+                    <div class="d-flex gap-2 align-items-start">
+                        <span class="priority-badge {% if topic.priority == 'HIGH' %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning-emphasis{% endif %}">{{ topic.priority }}</span>
+                        <div class="flex-grow-1">
+                            <div class="topic-name">{{ forloop.counter }}. {{ topic.name }}</div>
+                            <div class="topic-meta mt-1">{{ topic.unit }} &middot; Suggested time: {{ topic.minutes }} min &middot; {{ topic.reason }}{% if topic.previous_year_appearances %} &middot; Prior-paper evidence: {{ topic.previous_year_appearances }}{% endif %}</div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </section>
+
+            <section class="mb-4">
+                <h3 class="section-title">Revision schedule</h3>
+                {% for item in plan.schedule %}
+                <div class="schedule-row d-flex gap-3 align-items-start {% if item.kind == 'break' %}schedule-break{% endif %}">
+                    <span class="schedule-time">{{ item.start }} - {{ item.end }}</span>
+                    <span>{{ item.label }}{% if item.kind == 'study' %} <small class="topic-meta">({{ item.minutes }} min)</small>{% endif %}</span>
+                </div>
+                {% endfor %}
+                <div class="topic-meta mt-2">Study time scheduled: {{ plan.study_minutes }} minutes. Breaks are separate and never exceed the selected available study time.</div>
+            </section>
+
+            {% if plan.questions %}
+            <section class="mb-4">
+                <h3 class="section-title">Questions to revise</h3>
+                <ol class="mb-0">
+                    {% for question in plan.questions %}<li class="topic-name mb-2">{{ question }}</li>{% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            <section>
+                <h3 class="section-title">Final 30-minute revision</h3>
+                <ul class="checklist mb-0">
+                    {% for item in plan.final_checklist %}<li>{{ item }}</li>{% endfor %}
+                </ul>
+            </section>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

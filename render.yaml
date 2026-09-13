@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: vtu-genius
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn vtu_genius.wsgi:application
+    healthCheckPath: /health/
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        value: llama3.2
+      - key: CHROMA_DB_PATH
+        value: /tmp/chroma_db
+      - key: STATIC_ROOT
+        value: staticfiles
+      - key: MEDIA_ROOT
+        value: media
