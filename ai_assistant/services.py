@@ -1,9 +1,11 @@
 from django.core.exceptions import ImproperlyConfigured
 from pypdf import PdfReader
+from google import genai
 import logging
 import re
 import requests
 import time
+from urllib.parse import urlparse
 from django.conf import settings
 
 
@@ -11,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class AIService:
-    # Maximum amount of PDF text sent to Ollama for one question
+    # Maximum amount of PDF text sent to AI for one question
     MAX_NOTE_CHARS = 10000
 
-    # Maximum previous messages sent to Ollama
+    # Maximum previous messages sent to AI
     MAX_HISTORY_MESSAGES = 6
 
     instructions = """
@@ -31,6 +33,7 @@ ANSWER LENGTH:
   requires that much explanation.
 - Do NOT make a 10-mark answer unnecessarily short.
 - Do NOT add unrelated information just to increase length.
+
 STRICT SOURCE CONTROL:
 When retrieved or uploaded notes are provided, they are the primary source.
 Use only the supplied note context to answer technical questions; do not fill
@@ -149,16 +152,90 @@ Answer only what is relevant to the student's question.
 """
 
     def __init__(self):
-        self.api_base_url = self._build_api_base_url(settings.OLLAMA_BASE_URL)
+        """
+        Initialize the configured AI provider.
+
+        LOCAL:
+            AI_PROVIDER=ollama
+            Uses local Ollama.
+
+        RENDER:
+            AI_PROVIDER=gemini
+            Uses Gemini API.
+        """
+
+        self.provider = getattr(
+            settings,
+            "AI_PROVIDER",
+            "ollama",
+        ).strip().lower()
+
+        # ---------------------------------------------------------
+        # GEMINI PROVIDER
+        # ---------------------------------------------------------
+
+        if self.provider == "gemini":
+
+            if not settings.AI_API_KEY:
+                raise ImproperlyConfigured(
+                    "Gemini API key is not configured."
+                )
+
+            self.gemini_client = genai.Client(
+                api_key=settings.AI_API_KEY
+            )
+
+            self.model = settings.GEMINI_MODEL
+
+            return
+
+        # ---------------------------------------------------------
+        # OLLAMA PROVIDER
+        # ---------------------------------------------------------
+
+        if self.provider != "ollama":
+            raise ImproperlyConfigured(
+                f"Unsupported AI provider: {self.provider}"
+            )
+
+        if not settings.OLLAMA_BASE_URL:
+            raise ImproperlyConfigured(
+                "No Ollama endpoint is configured."
+            )
+
+        self.api_base_url = self._build_api_base_url(
+            settings.OLLAMA_BASE_URL
+        )
+
+        parsed_url = urlparse(self.api_base_url)
+
+        if not parsed_url.scheme or not parsed_url.netloc:
+            raise ImproperlyConfigured(
+                "The configured Ollama endpoint is invalid."
+            )
+
+        # Never allow Render to accidentally use localhost Ollama.
+        if settings.IS_RENDER and parsed_url.hostname in {
+            "localhost",
+            "127.0.0.1",
+            "::1",
+        }:
+            raise ImproperlyConfigured(
+                "A reachable production Ollama endpoint is required."
+            )
+
         self.ollama_url = f"{self.api_base_url}/chat"
         self.model = settings.OLLAMA_MODEL
+
         self._validate_configuration()
 
     @staticmethod
     def _build_api_base_url(base_url):
         base_url = (base_url or "").strip().rstrip("/")
+
         if base_url.endswith("/api"):
             return base_url
+
         return f"{base_url}/api"
 
     # ---------------------------------------------------------
@@ -171,6 +248,7 @@ Answer only what is relevant to the student's question.
                 f"{self.api_base_url}/tags",
                 timeout=5,
             )
+
             response.raise_for_status()
 
         except requests.RequestException as exc:
@@ -178,6 +256,7 @@ Answer only what is relevant to the student's question.
                 "Ollama availability check failed: %s",
                 type(exc).__name__,
             )
+
             raise ImproperlyConfigured(
                 "The AI service is unavailable. Please try again later."
             ) from exc
@@ -230,7 +309,10 @@ Answer only what is relevant to the student's question.
         }
 
         question_words = set(
-            re.findall(r"[a-zA-Z0-9]+", question)
+            re.findall(
+                r"[a-zA-Z0-9]+",
+                question,
+            )
         )
 
         question_words = {
@@ -252,7 +334,10 @@ Answer only what is relevant to the student's question.
         ).lower()
 
         metadata_words = set(
-            re.findall(r"[a-zA-Z0-9]+", metadata)
+            re.findall(
+                r"[a-zA-Z0-9]+",
+                metadata,
+            )
         )
 
         score = 0
@@ -262,8 +347,13 @@ Answer only what is relevant to the student's question.
                 score += 10
 
         # Stronger match for exact subject/unit text
-        subject = str(getattr(note, "subject", "")).lower()
-        unit = str(getattr(note, "unit", "")).lower()
+        subject = str(
+            getattr(note, "subject", "")
+        ).lower()
+
+        unit = str(
+            getattr(note, "unit", "")
+        ).lower()
 
         if subject and subject in question:
             score += 30
@@ -282,7 +372,7 @@ Answer only what is relevant to the student's question.
         """
         Safely extracts text from a PDF.
 
-        max_chars prevents very large PDFs from being sent to Ollama.
+        max_chars prevents very large PDFs from being sent to AI.
         """
 
         try:
@@ -325,13 +415,96 @@ Answer only what is relevant to the student's question.
             return "\n\n".join(page_text)
 
         except Exception as exc:
-
             logger.warning(
                 "PDF text extraction failed: %s",
                 type(exc).__name__,
             )
 
             return ""
+
+    # ---------------------------------------------------------
+    # GEMINI RESPONSE
+    # ---------------------------------------------------------
+
+    def _generate_gemini_response(self, messages):
+        """
+        Generate an answer using Gemini.
+        """
+
+        try:
+            system_message = ""
+            conversation = []
+
+            for item in messages:
+
+                role = item.get("role")
+                content = item.get("content", "")
+
+                if not content:
+                    continue
+
+                if role == "system":
+                    system_message = content
+
+                elif role == "user":
+                    conversation.append(
+                        f"STUDENT:\n{content}"
+                    )
+
+                elif role == "assistant":
+                    conversation.append(
+                        f"VTU GENIUS:\n{content}"
+                    )
+
+            prompt_parts = []
+
+            if system_message:
+                prompt_parts.append(
+                    "SYSTEM INSTRUCTIONS:\n"
+                    + system_message
+                )
+
+            if conversation:
+                prompt_parts.append(
+                    "\n\n".join(conversation)
+                )
+
+            prompt = "\n\n".join(prompt_parts).strip()
+
+            if not prompt:
+                raise RuntimeError(
+                    "Gemini prompt is empty."
+                )
+
+            response = (
+                self.gemini_client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                )
+            )
+
+            response_text = getattr(
+                response,
+                "text",
+                None,
+            )
+
+            if not response_text:
+                raise RuntimeError(
+                    "Gemini returned an empty response."
+                )
+
+            return response_text.strip()
+
+        except Exception as exc:
+            logger.error(
+                "Gemini request failed: %s",
+                type(exc).__name__,
+            )
+
+            raise RuntimeError(
+                "The AI service is unavailable. Please try again later."
+            ) from exc
 
     # ---------------------------------------------------------
     # GENERATE RESPONSE
@@ -346,10 +519,14 @@ Answer only what is relevant to the student's question.
     ):
 
         if not message or not message.strip():
-            raise ValueError("Message cannot be empty.")
+            raise ValueError(
+                "Message cannot be empty."
+            )
 
         message = message.strip()
-        notes_context = (notes_context or "").strip()
+        notes_context = (
+            notes_context or ""
+        ).strip()
 
         # -----------------------------------------------------
         # Build current user message
@@ -376,7 +553,10 @@ Answer only what is relevant to the student's question.
         messages = [
             {
                 "role": "system",
-                "content": system_instructions or self.instructions,
+                "content": (
+                    system_instructions
+                    or self.instructions
+                ),
             }
         ]
 
@@ -390,32 +570,40 @@ Answer only what is relevant to the student's question.
 
             for item in conversation_history:
 
-                normalized = self._normalize_history_item(item)
+                normalized = (
+                    self._normalize_history_item(item)
+                )
 
                 if normalized:
                     history.append(normalized)
 
         # Only keep the most recent messages
         if len(history) > self.MAX_HISTORY_MESSAGES:
-            history = history[-self.MAX_HISTORY_MESSAGES:]
+            history = history[
+                -self.MAX_HISTORY_MESSAGES:
+            ]
 
         # -----------------------------------------------------
         # Prevent current question duplication
         # -----------------------------------------------------
 
         if history:
+
             last_item = history[-1]
 
             if (
                 last_item["role"] == "user"
-                and last_item["content"].strip() == message
+                and last_item["content"].strip()
+                == message
             ):
+
                 history[-1] = {
                     "role": "user",
                     "content": user_content,
                 }
 
             else:
+
                 history.append(
                     {
                         "role": "user",
@@ -435,7 +623,16 @@ Answer only what is relevant to the student's question.
         messages.extend(history)
 
         # -----------------------------------------------------
-        # Send request to Ollama
+        # GEMINI
+        # -----------------------------------------------------
+
+        if self.provider == "gemini":
+            return self._generate_gemini_response(
+                messages
+            )
+
+        # -----------------------------------------------------
+        # OLLAMA
         # -----------------------------------------------------
 
         request_started = time.monotonic()
@@ -465,7 +662,10 @@ Answer only what is relevant to the student's question.
 
         except requests.Timeout as exc:
 
-            duration = time.monotonic() - request_started
+            duration = (
+                time.monotonic()
+                - request_started
+            )
 
             logger.error(
                 "Ollama timed out after %.2f seconds.",
@@ -479,7 +679,10 @@ Answer only what is relevant to the student's question.
 
         except requests.RequestException as exc:
 
-            duration = time.monotonic() - request_started
+            duration = (
+                time.monotonic()
+                - request_started
+            )
 
             logger.error(
                 "Ollama request failed after %.2f seconds: %s",
@@ -488,14 +691,18 @@ Answer only what is relevant to the student's question.
             )
 
             raise RuntimeError(
-                "The AI service is unavailable. Please try again later."
+                "The AI service is unavailable. "
+                "Please try again later."
             ) from exc
 
         # -----------------------------------------------------
-        # Get AI response
+        # Get Ollama response
         # -----------------------------------------------------
 
-        duration = time.monotonic() - request_started
+        duration = (
+            time.monotonic()
+            - request_started
+        )
 
         logger.info(
             "Ollama request completed in %.2f seconds.",
@@ -503,7 +710,13 @@ Answer only what is relevant to the student's question.
         )
 
         response_text = (
-            data.get("message", {}).get("content", "")
+            data.get(
+                "message",
+                {},
+            ).get(
+                "content",
+                "",
+            )
             if isinstance(data, dict)
             else ""
         )
@@ -522,15 +735,27 @@ Answer only what is relevant to the student's question.
 
     def _normalize_history_item(self, item):
 
-        role = getattr(item, "role", None)
-        content = getattr(item, "content", None)
+        role = getattr(
+            item,
+            "role",
+            None,
+        )
+
+        content = getattr(
+            item,
+            "content",
+            None,
+        )
 
         if isinstance(item, dict):
 
             role = item.get("role")
             content = item.get("content")
 
-        if role not in {"user", "assistant"}:
+        if role not in {
+            "user",
+            "assistant",
+        }:
             return None
 
         if not content:

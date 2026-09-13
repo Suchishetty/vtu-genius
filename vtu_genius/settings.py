@@ -175,9 +175,12 @@ CHROMA_DB_PATH = Path(
     os.environ.get("CHROMA_DB_PATH", str(BASE_DIR / "chroma_db"))
 )
 
-OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+OLLAMA_BASE_URL = os.environ.get(
+    "OLLAMA_BASE_URL",
+    "" if IS_RENDER else "http://localhost:11434",
+).strip().rstrip("/")
 if not OLLAMA_BASE_URL.endswith("/api"):
-    OLLAMA_BASE_URL = f"{OLLAMA_BASE_URL}/api"
+    OLLAMA_BASE_URL = f"{OLLAMA_BASE_URL}/api" if OLLAMA_BASE_URL else ""
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
 
 SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", not DEBUG)
@@ -194,6 +197,8 @@ SECURE_HSTS_PRELOAD = env_bool("SECURE_HSTS_PRELOAD", False)
 
 # AI API key must be provided through the environment and must never be committed to Git.
 AI_API_KEY = os.environ.get("AI_API_KEY", "")
+AI_PROVIDER = os.environ.get("AI_PROVIDER", "ollama").strip().lower()
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
 
 LOGIN_REDIRECT_URL = 'dashboard:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:home'

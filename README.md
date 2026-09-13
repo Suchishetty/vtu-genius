@@ -175,6 +175,8 @@ Production configuration requires:
 
 Localhost Ollama works only for local development. Ollama is not hosted by this project on Render and is not installed by the Render build. Production AI requires a separately hosted reachable endpoint; no paid AI provider is required by the application.
 
+If `OLLAMA_BASE_URL` is missing on Render, the AI Assistant reports that production AI is not configured and does not attempt a localhost request. A Render value pointing to `localhost` is also rejected before any network request.
+
 Uploaded media, SQLite, and local ChromaDB data on Render's free filesystem are not permanent. Persistent production media, database, and vector storage require appropriate infrastructure. AWS/S3 is not currently required or configured.
 
 Current deployed application: https://vtu-genius.onrender.com
