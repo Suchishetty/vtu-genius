@@ -4,9 +4,7 @@ import logging
 import re
 from pathlib import Path
 
-import chromadb
 from django.conf import settings
-from sentence_transformers import SentenceTransformer
 
 from .services import AIService
 
@@ -25,6 +23,8 @@ class RAGService:
     _embedding_model = None
 
     def __init__(self):
+        import chromadb
+
         database_path = Path(settings.CHROMA_DB_PATH)
         self.client = chromadb.PersistentClient(path=str(database_path))
         self.collection = self.client.get_or_create_collection(
@@ -36,6 +36,8 @@ class RAGService:
     def _get_embedding_model(cls):
         """Load the embedding model once per Django process."""
         if cls._embedding_model is None:
+            from sentence_transformers import SentenceTransformer
+
             cls._embedding_model = SentenceTransformer(cls.embedding_model_name)
         return cls._embedding_model
 
