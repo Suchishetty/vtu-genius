@@ -121,7 +121,7 @@ bash build.sh
 4. Use this start command:
 
 ```text
-gunicorn vtu_genius.wsgi:application
+gunicorn vtu_genius.wsgi:application --bind 0.0.0.0:$PORT
 ```
 
 5. Set the required environment variables in Render:
